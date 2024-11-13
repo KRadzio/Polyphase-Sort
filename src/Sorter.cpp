@@ -14,7 +14,7 @@ Sorter &Sorter::GetInstance()
     return *instance;
 }
 
-std::string Sorter::PickRecord(bool serieEnded) {}
+std::string Sorter::PickRecord(bool serieEnded) { return EMPTY_RECORD; }
 
 void Sorter::Sort(std::string inputTapeName)
 {
@@ -61,6 +61,112 @@ void Sorter::Sort(std::string inputTapeName)
             std::string record1;
             std::string record2;
 
+            while (!longerTapeSerieEnded || !shorterTapeSerieEnded)
+            {
+                if (!longerTapeSerieEnded)
+                {
+                    if (phase == 0)
+                    {
+                        // meaby check for dupes?
+                        if (longerTapeBuffer[longerTapeIndex] == longerTapeSeriesEnd[longerTapeSerieIndex])
+                        {
+                            longerTapeSerieEnded = true;
+                            record1 = longerTapeBuffer[longerTapeIndex];
+                        }
+                        else
+                            record1 = longerTapeBuffer[longerTapeIndex];
+                    }
+                    else
+                    {
+                        if (longerTapeBuffer[longerTapeIndex + 1] < longerTapeBuffer[longerTapeIndex])
+                        {
+                            longerTapeSerieEnded = true;
+                            record1 = longerTapeBuffer[longerTapeIndex];
+                        }
+                        else
+                            record1 = longerTapeBuffer[longerTapeIndex];
+                    }
+                    longerTapeIndex++;
+                }
+                else
+                    record1 = EMPTY_RECORD;
+
+                if (!shorterTapeSerieEnded)
+                {
+                    if (phase == 0)
+                    {
+                        if (shorterTapeBuffer[shorterTapeIndex] == shorterTapeSeriesEnd[shorterTapeSerieIndex])
+                        {
+                            shorterTapeSerieEnded = true;
+                            record2 = shorterTapeBuffer[shorterTapeIndex];
+                        }
+                        else
+                            record2 = shorterTapeBuffer[shorterTapeIndex];
+                    }
+                    else
+                    {
+                        if (shorterTapeBuffer[shorterTapeIndex + 1] < shorterTapeBuffer[shorterTapeIndex])
+                        {
+                            shorterTapeSerieEnded = true;
+                            record2 = shorterTapeBuffer[shorterTapeIndex];
+                        }
+                        else
+                            record2 = shorterTapeBuffer[shorterTapeIndex];
+                    }
+                    shorterTapeIndex++;
+                }
+                else
+                    record2 = EMPTY_RECORD;
+
+
+                // record should be sorted inside serie
+                // maybe use a buffer to store a serie ?
+                if (record1 < record2)
+                {
+                    if (record1 != EMPTY_RECORD)
+                    {
+                        inputOutputBuffer[outputBufferIndex] = record1;
+                        outputBufferIndex++;
+                    }
+                    if (record2 != EMPTY_RECORD)
+                    {
+                        inputOutputBuffer[outputBufferIndex] = record2;
+                        outputBufferIndex++;
+                    }
+                }
+                else
+                {
+                    if (record2 != EMPTY_RECORD)
+                    {
+                        inputOutputBuffer[outputBufferIndex] = record2;
+                        outputBufferIndex++;
+                    }
+                    if (record1 != EMPTY_RECORD)
+                    {
+                        inputOutputBuffer[outputBufferIndex] = record1;
+                        outputBufferIndex++;
+                    }
+                }
+                std::cout << record1 << " " << record2 << std::endl;
+            }
+
+            if (longerTapeIndex == BLOC_SIZE / RECORD_SIZE)
+            {
+                longerTapeIndex = 0;
+                longerTapeBlockNum++;
+                FileManager::GetInstance().ReadBlockFromFile(longerTape, longerTapeBlockNum, longerTapeBuffer);
+            }
+            if (shorterTapeIndex == BLOC_SIZE / RECORD_SIZE)
+            {
+                shorterTapeIndex = 0;
+                shorterTapeBlockNum++;
+                FileManager::GetInstance().ReadBlockFromFile(shorterTape, shorterTapeBlockNum, shorterTapeBuffer);
+            }
+            if (outputBufferIndex == BLOC_SIZE / RECORD_SIZE)
+            {
+                FileManager::GetInstance().WriteBlockToFile(emptyTape, inputOutputBuffer);
+                outputBufferIndex = 0;
+            }
             // pick one record from each serie and put then into the output buffer
             // if one record is smaller than the last inserted then we should reorganize the buffer
             // if the buffer is full then save it to the "empty tape"
@@ -140,6 +246,8 @@ void Sorter::SplitToTapes(std::string inputTapeName)
         AlternativeSplit(inputTapeName, prev2);
     else // even - odd distribution
         DefaultSplit(inputTapeName, prev2);
+
+    FileManager::GetInstance().ClearBufferFromIndex(inputOutputBuffer, 0);
 }
 
 // split parts to smaller functions

@@ -31,12 +31,10 @@ public:
     bool ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer);
     void WriteBlockToFile(std::string filename, std::vector<std::string> &buffer);
     void ClearFile(std::string filename);
+    void ClearBufferFromIndex(std::vector<std::string> &buffer, size_t index);
 
     inline size_t GetReads() { return reads; }
     inline size_t GetWrites() { return writes; }
-
-private:
-    void ClearBufferFromIndex(std::vector<std::string> &buffer, size_t index);
 
 private:
     FileManager();
