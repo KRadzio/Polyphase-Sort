@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "FileManager.hpp"
+#include "Tape.hpp"
 
 class Sorter
 {
@@ -17,7 +18,6 @@ private:
     std::string PickRecord(bool serieEnded);
     void SplitToTapes(std::string inputTapeName);
     void DefaultSplit(std::string inputTapeName, size_t prev2);
-    void AlternativeSplit(std::string inputTapeName, size_t prev2);
     int FindClosestFibNumberIndex(size_t seriesCount);
     size_t CalculateNumberOfSeries(std::string tapeName);
 
