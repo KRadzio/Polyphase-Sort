@@ -61,6 +61,7 @@ void Sorter::SplitToTapes(std::string inputTapeName)
 
     int turn = 0;
 
+    // something here is not working properly
     while (!tape1.HasEnded())
     {
         if (turn % 2 == 0)
@@ -69,7 +70,7 @@ void Sorter::SplitToTapes(std::string inputTapeName)
             {
                 std::string record = tape1.GetNextRecord();
                 std::string prevRecord = tape1.GetPrevRecord();
-                if (prevRecord > record)
+                if (prevRecord > record || record == EMPTY_RECORD)
                 {
                     tape2.SetNextSerieEnd(prevRecord);
                     tape2.IncrementNumberOfSeries();
@@ -95,7 +96,7 @@ void Sorter::SplitToTapes(std::string inputTapeName)
             {
                 std::string record = tape1.GetNextRecord();
                 std::string prevRecord = tape1.GetPrevRecord();
-                if (prevRecord > record)
+                if (prevRecord > record || record == EMPTY_RECORD)
                 {
                     tape3.SetNextSerieEnd(prevRecord);
                     tape3.IncrementNumberOfSeries();

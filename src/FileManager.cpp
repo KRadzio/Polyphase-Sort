@@ -75,6 +75,7 @@ bool FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vec
         {
             // std::cout << "Block: " << blockNum << " out of range" << std::endl;
             file.close();
+            ClearBufferFromIndex(buffer,0);
             return false;
         }
     }
