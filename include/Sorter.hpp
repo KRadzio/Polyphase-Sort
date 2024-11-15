@@ -15,17 +15,18 @@ public:
 
 private:
     size_t Fib(int n);
-    std::string PickRecord(bool serieEnded);
     void SplitToTapes(std::string inputTapeName);
     void DefaultSplit(std::string inputTapeName, size_t prev2);
     int FindClosestFibNumberIndex(size_t seriesCount);
-    size_t CalculateNumberOfSeries(std::string tapeName);
 
 private:
     Sorter();
     ~Sorter();
 
 private:
+    Tape tape1;
+    Tape tape2;
+    Tape tape3;
     std::vector<std::string> inputOutputBuffer;
     std::vector<std::string> longerTapeBuffer;
     std::vector<std::string> shorterTapeBuffer;
@@ -34,9 +35,10 @@ private:
     //
     size_t dummyCount = 0;
     size_t seriesCount;
-    size_t prev;
-    size_t prev2;
-    size_t index;
+    size_t currFib;
+    size_t prev = 1;
+    size_t prev2 = 1;
+    size_t index = 1;
     size_t numberOfPhases;
 };
 #endif

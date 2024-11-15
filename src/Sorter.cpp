@@ -2,11 +2,16 @@
 
 Sorter::Sorter()
 {
-    inputOutputBuffer = std::vector<std::string>(BLOC_SIZE / RECORD_SIZE);
-    longerTapeBuffer = std::vector<std::string>(BLOC_SIZE / RECORD_SIZE);
-    shorterTapeBuffer = std::vector<std::string>(BLOC_SIZE / RECORD_SIZE);
+    tape1.SetFile(TAPE1);
+    tape2.SetFile(TAPE2);
+    tape3.SetFile(TAPE3);
 }
-Sorter::~Sorter() {}
+Sorter::~Sorter()
+{
+    tape1.~Tape();
+    tape2.~Tape();
+    tape3.~Tape();
+}
 
 Sorter &Sorter::GetInstance()
 {
@@ -14,196 +19,13 @@ Sorter &Sorter::GetInstance()
     return *instance;
 }
 
-std::string Sorter::PickRecord(bool serieEnded) { return EMPTY_RECORD; }
-
 void Sorter::Sort(std::string inputTapeName)
 {
-    seriesCount = CalculateNumberOfSeries(inputTapeName);
-    index = FindClosestFibNumberIndex(seriesCount);
-    numberOfPhases = index - 2;
-    prev = Fib(index - 1);
-    prev2 = Fib(index - 2);
-    if (prev + prev2 != seriesCount && seriesCount != 1)
-        dummyCount = prev + prev2 - seriesCount;
     SplitToTapes(inputTapeName); // dystribution
 
     // sorting
 
     FileManager::GetInstance().ClearFile(TAPE1);
-
-    // in each faze one tape will become empty
-    // prev will become prev2
-    // prev2 will become Fib(n-1)
-    std::string emptyTape = TAPE1;
-    std::string longerTape = TAPE2;
-    std::string shorterTape = TAPE3;
-
-    size_t outputBufferIndex = 0;
-    size_t longerTapeIndex = 0;
-    size_t shorterTapeIndex = 0;
-    size_t longerTapeBlockNum = 1;
-    size_t shorterTapeBlockNum = 1;
-    size_t longerTapeSerieIndex = 0;
-    size_t shorterTapeSerieIndex = 0;
-
-    // sorting
-    size_t phase = 0;
-
-    while (phase < numberOfPhases)
-    {
-        FileManager::GetInstance().ReadBlockFromFile(longerTape, longerTapeBlockNum, longerTapeBuffer);
-        FileManager::GetInstance().ReadBlockFromFile(shorterTape, shorterTapeBlockNum, shorterTapeBuffer);
-        size_t serieNum = 0; // the amount of series that will be merged in each phase, it is also the amount of phases on the shorter tape
-        while (serieNum < prev2)
-        {
-            bool longerTapeSerieEnded = false;
-            bool shorterTapeSerieEnded = false;
-            std::string record1;
-            std::string record2;
-
-            while (!longerTapeSerieEnded || !shorterTapeSerieEnded)
-            {
-                if (!longerTapeSerieEnded)
-                {
-                    if (phase == 0)
-                    {
-                        // meaby check for dupes?
-                        if (longerTapeBuffer[longerTapeIndex] == longerTapeSeriesEnd[longerTapeSerieIndex])
-                        {
-                            longerTapeSerieEnded = true;
-                            record1 = longerTapeBuffer[longerTapeIndex];
-                        }
-                        else
-                            record1 = longerTapeBuffer[longerTapeIndex];
-                    }
-                    else
-                    {
-                        if (longerTapeBuffer[longerTapeIndex + 1] < longerTapeBuffer[longerTapeIndex])
-                        {
-                            longerTapeSerieEnded = true;
-                            record1 = longerTapeBuffer[longerTapeIndex];
-                        }
-                        else
-                            record1 = longerTapeBuffer[longerTapeIndex];
-                    }
-                    longerTapeIndex++;
-                }
-                else
-                    record1 = EMPTY_RECORD;
-
-                if (!shorterTapeSerieEnded)
-                {
-                    if (phase == 0)
-                    {
-                        if (shorterTapeBuffer[shorterTapeIndex] == shorterTapeSeriesEnd[shorterTapeSerieIndex])
-                        {
-                            shorterTapeSerieEnded = true;
-                            record2 = shorterTapeBuffer[shorterTapeIndex];
-                        }
-                        else
-                            record2 = shorterTapeBuffer[shorterTapeIndex];
-                    }
-                    else
-                    {
-                        if (shorterTapeBuffer[shorterTapeIndex + 1] < shorterTapeBuffer[shorterTapeIndex])
-                        {
-                            shorterTapeSerieEnded = true;
-                            record2 = shorterTapeBuffer[shorterTapeIndex];
-                        }
-                        else
-                            record2 = shorterTapeBuffer[shorterTapeIndex];
-                    }
-                    shorterTapeIndex++;
-                }
-                else
-                    record2 = EMPTY_RECORD;
-
-                // record should be sorted inside serie
-                // maybe use a buffer to store a serie ?
-                // maybe a tape class?
-                if (record1 < record2)
-                {
-                    if (record1 != EMPTY_RECORD)
-                    {
-                        inputOutputBuffer[outputBufferIndex] = record1;
-                        outputBufferIndex++;
-                    }
-                    if (record2 != EMPTY_RECORD)
-                    {
-                        inputOutputBuffer[outputBufferIndex] = record2;
-                        outputBufferIndex++;
-                    }
-                }
-                else
-                {
-                    if (record2 != EMPTY_RECORD)
-                    {
-                        inputOutputBuffer[outputBufferIndex] = record2;
-                        outputBufferIndex++;
-                    }
-                    if (record1 != EMPTY_RECORD)
-                    {
-                        inputOutputBuffer[outputBufferIndex] = record1;
-                        outputBufferIndex++;
-                    }
-                }
-                std::cout << record1 << " " << record2 << std::endl;
-            }
-
-            if (longerTapeIndex == BLOC_SIZE / RECORD_SIZE)
-            {
-                longerTapeIndex = 0;
-                longerTapeBlockNum++;
-                FileManager::GetInstance().ReadBlockFromFile(longerTape, longerTapeBlockNum, longerTapeBuffer);
-            }
-            if (shorterTapeIndex == BLOC_SIZE / RECORD_SIZE)
-            {
-                shorterTapeIndex = 0;
-                shorterTapeBlockNum++;
-                FileManager::GetInstance().ReadBlockFromFile(shorterTape, shorterTapeBlockNum, shorterTapeBuffer);
-            }
-            if (outputBufferIndex == BLOC_SIZE / RECORD_SIZE)
-            {
-                FileManager::GetInstance().WriteBlockToFile(emptyTape, inputOutputBuffer);
-                outputBufferIndex = 0;
-            }
-            // pick one record from each serie and put then into the output buffer
-            // if one record is smaller than the last inserted then we should reorganize the buffer
-            // if the buffer is full then save it to the "empty tape"
-            // the two other buffer also have to be refreshed after we reached the end of them
-            // if a serie ended then we record that we picked is empty
-
-            if (phase == 0)
-            {
-                longerTapeSerieIndex++;
-                shorterTapeSerieIndex++;
-            }
-            serieNum++;
-        }
-        // after the first loop we do not need the serieindex becouse no more series will combine
-        // if a serie is made for example of "f" , "f" , "f" and the previous serie ended with "f" the remembering end of series may not work properly
-        // save the output buffer after all series in a phase are merged
-
-        FileManager::GetInstance().WriteBlockToFile(emptyTape, inputOutputBuffer);
-
-        index--;
-        prev = Fib(index - 1);
-        prev2 = Fib(index - 2);
-
-        FileManager::GetInstance().ClearFile(shorterTape);
-
-        shorterTapeIndex = longerTapeIndex;
-        shorterTapeBlockNum = longerTapeBlockNum;
-        longerTapeIndex = 0;
-        longerTapeBlockNum = 1;
-        outputBufferIndex = 0;
-
-        std::string tmp = emptyTape;
-        emptyTape = shorterTape;
-        shorterTape = longerTape;
-        longerTape = tmp;
-        phase++;
-    }
 }
 
 size_t Sorter::Fib(int n)
@@ -233,14 +55,83 @@ void Sorter::SplitToTapes(std::string inputTapeName)
 {
     FileManager::GetInstance().ClearFile(TAPE2);
     FileManager::GetInstance().ClearFile(TAPE3);
+    tape1.SetFileAndFillBuffer(inputTapeName);
 
-    longerTapeSeriesEnd = std::vector<std::string>(prev); // read after merging with dummies
-    shorterTapeSeriesEnd = std::vector<std::string>(prev2);
+    currFib = Fib(index);
 
-    // rewrite this
-    DefaultSplit(inputTapeName, prev2);
+    int turn = 0;
 
-    FileManager::GetInstance().ClearBufferFromIndex(inputOutputBuffer, 0);
+    while (!tape1.HasEnded())
+    {
+        if (turn % 2 == 0)
+        {
+            while (tape2.GetNumberOfSeries() < currFib)
+            {
+                std::string record = tape1.GetNextRecord();
+                std::string prevRecord = tape1.GetPrevRecord();
+                if (prevRecord > record)
+                {
+                    tape2.SetNextSerieEnd(prevRecord);
+                    tape2.IncrementNumberOfSeries();
+                    // we will write the record to the other tape if we reached the current goal
+                    if (tape2.GetNumberOfSeries() == currFib && record != EMPTY_RECORD)
+                        tape3.SetNextRecord(record);
+                    else if (record != EMPTY_RECORD)
+                        tape2.SetNextRecord(record);
+                    // the loop won't break by itself
+                    if (record == EMPTY_RECORD)
+                        break;
+                }
+                else
+                    tape2.SetNextRecord(record);
+            }
+            index++;
+            currFib = Fib(index);
+            turn++;
+        }
+        else
+        {
+            while (tape3.GetNumberOfSeries() < currFib)
+            {
+                std::string record = tape1.GetNextRecord();
+                std::string prevRecord = tape1.GetPrevRecord();
+                if (prevRecord > record)
+                {
+                    tape3.SetNextSerieEnd(prevRecord);
+                    tape3.IncrementNumberOfSeries();
+                    // we will write the record to the other tape if we reached the current goal
+                    if (tape3.GetNumberOfSeries() == currFib && record != EMPTY_RECORD)
+                        tape2.SetNextRecord(record);
+                    else if (record != EMPTY_RECORD)
+                        tape3.SetNextRecord(record);
+                    // the loop won't break by itself
+                    if (record == EMPTY_RECORD)
+                        break;
+                }
+                else
+                    tape3.SetNextRecord(record);
+            }
+            index++;
+            currFib = Fib(index);
+            turn++;
+        }
+    }
+    tape2.Save();
+    tape3.Save();
+
+    if (turn % 2 == 1)
+        std::cout << "Tape 2 is longer" << std::endl;
+    else
+        std::cout << "Tape 3 is longer" << std::endl;
+
+    // and what if the input tape is sorted?
+    if (tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries() == 1)
+        std::cout << "File already sorted" << std::endl;
+    numberOfPhases = index - 2;
+    if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
+        dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
+
+    std::cout << currFib << " " << index << " " << tape2.GetNumberOfSeries() << " " << tape3.GetNumberOfSeries() << " " << dummyCount << std::endl;
 }
 
 // split parts to smaller functions
@@ -376,27 +267,4 @@ int Sorter::FindClosestFibNumberIndex(size_t seriesCount)
         }
     }
     return index;
-}
-
-size_t Sorter::CalculateNumberOfSeries(std::string tapeName)
-{
-    size_t blockIndex = 1;
-    size_t seriesCount = 0;
-    std::string lastRecordFromPrevBlock = "";
-    while (FileManager::GetInstance().ReadBlockFromFile(tapeName, blockIndex, inputOutputBuffer))
-    {
-        size_t index = 0;
-        while (index < inputOutputBuffer.size() - 1 && inputOutputBuffer[index] != "")
-        {
-            if (index == 0 && lastRecordFromPrevBlock > inputOutputBuffer[index]) // Serie could end at the last record of the previous block
-                seriesCount++;
-            if (inputOutputBuffer[index] > inputOutputBuffer[index + 1] || inputOutputBuffer[index + 1] == "")
-                seriesCount++;
-            index++;
-            if (index == inputOutputBuffer.size() - 2)
-                lastRecordFromPrevBlock = inputOutputBuffer[index + 1];
-        }
-        blockIndex++;
-    }
-    return seriesCount;
 }
