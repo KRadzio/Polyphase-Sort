@@ -57,7 +57,7 @@ void FileManager::DisplayEntireFile(std::string filename)
     file.close();
 }
 
-bool FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer)
+void FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer)
 {
     std::ifstream file;
     file.open(filename);
@@ -76,7 +76,7 @@ bool FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vec
             // std::cout << "Block: " << blockNum << " out of range" << std::endl;
             file.close();
             ClearBufferFromIndex(buffer,0);
-            return false;
+            return;
         }
     }
 
@@ -93,7 +93,7 @@ bool FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vec
         ClearBufferFromIndex(buffer, recordCount);
 
     file.close();
-    return true;
+    return;
 }
 void FileManager::WriteBlockToFile(std::string filename, std::vector<std::string> &buffer)
 {

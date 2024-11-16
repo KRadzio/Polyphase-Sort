@@ -15,14 +15,26 @@ public:
 
     std::string GetNextRecord();
     void SetNextRecord(std::string newRecord);
+
+    // if we merge two series the new record may not be in order
+    // example: we have "a" and "c" in the buffer and we want to add "b"
+    // we have to reorganize the serie in buffer
+    void SetNextRecordAndSortSerie(std::string newRecord, bool start = false);
+    std::string GetSerieEnd();
     std::string GetSerieNextEnd();
     void SetNextSerieEnd(std::string newSerieEnd);
 
+    void ResetIndexAndBuffer(); // used when tape has ended or its purpuse is swaped from read to write
     void Save();
-    void SetFileAndFillBuffer(std::string filename);
+    void SetFileAndFillBuffer(std::string filename); // change file, reset index and load first block from new file
 
     inline void ClearBuffer() { FileManager::GetInstance().ClearBufferFromIndex(vectorOfRecords, 0); }
     inline void FillBuffer() { FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords); }
+
+
+    inline void ReduceNumberOfSerie(size_t amount) {numberOfSeries -= amount;}
+    inline void ResetSeriesEnd() {seriesEnd.clear();}
+    inline void Clear(){FileManager::GetInstance().ClearFile(filename);} // to clear a file
     inline void SetFile(std::string filename) { this->filename = filename; }
     inline bool HasEnded() { return hasEnded; }
     inline std::string GetPrevRecord() { return prevRecord; }
