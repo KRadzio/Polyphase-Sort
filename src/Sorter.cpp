@@ -70,18 +70,21 @@ void Sorter::SplitToTapes(std::string inputTapeName)
             {
                 std::string record = tape1.GetNextRecord();
                 std::string prevRecord = tape1.GetPrevRecord();
-                if (prevRecord > record || record == EMPTY_RECORD)
+                if (record == EMPTY_RECORD)
+                {
+                    tape2.SetNextSerieEnd(prevRecord);
+                    tape2.IncrementNumberOfSeries();
+                    break;
+                }
+                if (prevRecord > record)
                 {
                     tape2.SetNextSerieEnd(prevRecord);
                     tape2.IncrementNumberOfSeries();
                     // we will write the record to the other tape if we reached the current goal
-                    if (tape2.GetNumberOfSeries() == currFib && record != EMPTY_RECORD)
+                    if (tape2.GetNumberOfSeries() == currFib)
                         tape3.SetNextRecord(record);
-                    else if (record != EMPTY_RECORD)
+                    else
                         tape2.SetNextRecord(record);
-                    // the loop won't break by itself
-                    if (record == EMPTY_RECORD)
-                        break;
                 }
                 else
                     tape2.SetNextRecord(record);
@@ -96,18 +99,21 @@ void Sorter::SplitToTapes(std::string inputTapeName)
             {
                 std::string record = tape1.GetNextRecord();
                 std::string prevRecord = tape1.GetPrevRecord();
-                if (prevRecord > record || record == EMPTY_RECORD)
+                if (record == EMPTY_RECORD)
+                {
+                    tape3.SetNextSerieEnd(prevRecord);
+                    tape3.IncrementNumberOfSeries();
+                    break;
+                }
+                if (prevRecord > record)
                 {
                     tape3.SetNextSerieEnd(prevRecord);
                     tape3.IncrementNumberOfSeries();
                     // we will write the record to the other tape if we reached the current goal
-                    if (tape3.GetNumberOfSeries() == currFib && record != EMPTY_RECORD)
+                    if (tape3.GetNumberOfSeries() == currFib)
                         tape2.SetNextRecord(record);
-                    else if (record != EMPTY_RECORD)
+                    else
                         tape3.SetNextRecord(record);
-                    // the loop won't break by itself
-                    if (record == EMPTY_RECORD)
-                        break;
                 }
                 else
                     tape3.SetNextRecord(record);

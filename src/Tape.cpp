@@ -11,37 +11,45 @@ std::string Tape::GetNextRecord()
         if (index > 0)
             prevRecord = vectorOfRecords[index - 1];
         index++;
-        return vectorOfRecords[index - 1];
+        if (vectorOfRecords[index - 1] != EMPTY_RECORD)
+            return vectorOfRecords[index - 1];
     }
-    if (index == BLOC_SIZE / RECORD_SIZE)
+    if (index == BLOC_SIZE / RECORD_SIZE && vectorOfRecords[index - 1] != EMPTY_RECORD)
     {
         prevRecord = vectorOfRecords[index - 1];
         index = 0;
         blockNum++;
         FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords);
-        return vectorOfRecords[index];
+        if (vectorOfRecords[index] != EMPTY_RECORD)
+        {
+            index++; // increment index since we return the first element of new block
+            return vectorOfRecords[index-1];
+        }   
     }
     if (vectorOfRecords[index] == EMPTY_RECORD)
         hasEnded = true;
-    // the record is empty
+
     return EMPTY_RECORD;
 }
 
 void Tape::SetNextRecord(std::string newRecord)
 {
-    if (index < BLOC_SIZE / RECORD_SIZE - 1)
+    if (newRecord == EMPTY_RECORD)
+        return;
+    if (index < BLOC_SIZE / RECORD_SIZE)
     {
         vectorOfRecords[index] = newRecord;
         index++;
+        return;
     }
-    if (index == BLOC_SIZE / RECORD_SIZE - 1)
+    if (index == BLOC_SIZE / RECORD_SIZE)
     {
-        vectorOfRecords[index] = newRecord;
         FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
         index = 0;
+        vectorOfRecords[index] = newRecord;
+        index++;
+        return;
     }
-    if (newRecord == EMPTY_RECORD) // the input has ended so we save what we have in buffer to file
-        FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
 }
 
 std::string Tape::GetSerieNextEnd()

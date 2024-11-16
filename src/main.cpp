@@ -49,7 +49,7 @@ int main()
     // FileManager::GetInstance().WriteBlockToFile("./tapes/test.txt", tape1Buffer);
     //  Sorter::GetInstance().Fib(10);
     // Sorter::GetInstance().Sort("./tapes/tape3.txt");
-    Sorter::GetInstance().Sort("./tapes/test5.txt");
+    Sorter::GetInstance().Sort("./tapes/test3.txt");
     // Sorter::GetInstance().Sort("./tapes/tape1.txt");
 
     return 0;
