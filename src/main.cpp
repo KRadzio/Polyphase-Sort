@@ -40,7 +40,7 @@ int main()
 {
     // FileManager::GetInstance().GenerateEmptyFile("./tapes/tape2.txt");
     // FileManager::GetInstance().GenerateEmptyFile("./tapes/tape1.txt");
-    //FileManager::GetInstance().GenerateFile(100000, "./tapes/test5.txt");
+    FileManager::GetInstance().GenerateFile(10000, "./tapes/test8.txt");
     //  FileManager::GetInstance().ReadFile("./tapes/tape3.txt");
     // FileManager::GetInstance().ReadBlockFromFile("./tapes/test.txt", 1);
     // FileManager::GetInstance().ReadBlockFromFile("./tapes/tape3.txt", 1);
@@ -49,7 +49,15 @@ int main()
     // FileManager::GetInstance().WriteBlockToFile("./tapes/test.txt", tape1Buffer);
     //  Sorter::GetInstance().Fib(10);
     // Sorter::GetInstance().Sort("./tapes/tape3.txt");
-    Sorter::GetInstance().Sort("./tapes/test4.txt");
+    Sorter::GetInstance().Sort("./tapes/test8.txt");
+
+    // std::vector<std::string> aaa;
+    // for(size_t i=0; i< 136; i++)
+        // aaa.push_back("aabbccddeeffgghhiijjkkllmmnnoo");
+
+//    FileManager::GetInstance().ReplaceBlockInFile(TAPE2,1,aaa);
+
+
     // Sorter::GetInstance().Sort("./tapes/tape1.txt");
 
     return 0;

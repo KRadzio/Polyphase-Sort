@@ -20,7 +20,7 @@ public:
     // if we merge two series the new record may not be in order
     // example: we have "a" and "c" in the buffer and we want to add "b"
     // we have to reorganize the serie in buffer
-    void SetNextRecordAndSortSerie(std::string newRecord, bool start = false);
+    void SetNextRecordAndSortSerie(std::string newRecord, bool startS = false, bool startL = false);
     std::string GetSerieEnd();
     std::string GetSerieNextEnd(); // returns first serie end after current index
     void SetNextSerieEnd(std::string newSerieEnd);
@@ -43,7 +43,12 @@ public:
     inline size_t GetNumberOfSeries() { return numberOfSeries; }
 
 private:
+    void checkPrevBlocks(std::string newRecord, size_t currPos);
+
+private:
     std::vector<std::string> vectorOfRecords;
+    std::vector<std::string> swapBuffer; // used when serie is longer than one block or a record needs to be placed in block than was already saved
+    std::vector<std::string> tmpV; // used when we reach index 0 in swapBuffer
     std::vector<std::string> seriesEnd; // used in first phase of mergeing
     size_t index = 0;
     size_t seriesEndIndex = 0;

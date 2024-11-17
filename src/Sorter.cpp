@@ -52,8 +52,6 @@ void Sorter::Sort(std::string inputTapeName)
 
     size_t currPhase = 0;
 
-     // something is wrong with serie end
-
     while (currPhase < numberOfPhases)
     {
         size_t seriesCount = 0;
@@ -64,24 +62,25 @@ void Sorter::Sort(std::string inputTapeName)
 
             std::string serieEndS = shorterTape->GetSerieEnd();
             std::string serieEndL = EMPTY_RECORD;
-             if (dummyCount > 0)
+            if (dummyCount > 0)
             {
                 serieEndedL = true;
                 dummyCount--;
             }
             else
                 serieEndL = longerTape->GetSerieEnd();
-            
 
             // choose new serie end
             if (serieEndS > serieEndL)
                 emptyTape->SetNextSerieEnd(serieEndS);
             else
                 emptyTape->SetNextSerieEnd(serieEndL);
-            bool first = true;
+            bool firstS = true;
+            bool firstL = true;
 
-           
-            // problem with dupes
+            // serie are to long at some point and they can take more than one page !!!
+            // this is the problem
+
             while (!serieEndedS || !serieEndedL)
             {
                 if (!serieEndedS)
@@ -89,10 +88,10 @@ void Sorter::Sort(std::string inputTapeName)
                     std::string recordS = shorterTape->GetNextRecord();
                     // the record from the shorter tape will always be inserted first
                     // so it will always start a serie
-                    if (first)
+                    if (firstS)
                     {
                         emptyTape->SetNextRecordAndSortSerie(recordS, true);
-                        first = false;
+                        firstS = false;
                     }
                     else
                         emptyTape->SetNextRecordAndSortSerie(recordS);
@@ -109,17 +108,22 @@ void Sorter::Sort(std::string inputTapeName)
                 if (!serieEndedL)
                 {
                     std::string recordL = longerTape->GetNextRecord();
-                    emptyTape->SetNextRecordAndSortSerie(recordL);
+                    if (firstL)
+                    {
+                        emptyTape->SetNextRecordAndSortSerie(recordL, false, true);
+                        firstL = false;
+                    }
+                    else
+                        emptyTape->SetNextRecordAndSortSerie(recordL);
                     if (recordL == serieEndL)
                     {
-                        if(longerTape->GetSerieNextEnd() == serieEndL && longerTape->GetRecordAhead() != serieEndL)
+                        if (longerTape->GetSerieNextEnd() == serieEndL && longerTape->GetRecordAhead() != serieEndL)
                             serieEndedL = true;
                         else if (longerTape->GetSerieNextEnd() != serieEndL && longerTape->GetRecordAhead() != serieEndL)
                             serieEndedL = true;
                         else
                             serieEndedL = false;
                     }
-                        
                 }
             }
             seriesCount++;
@@ -141,7 +145,6 @@ void Sorter::Sort(std::string inputTapeName)
         // Reset index on the previously empty tape (swap from write to read)
         longerTape->ResetIndexAndBuffer();
         longerTape->FillBuffer();
-
         currPhase++;
     }
 }

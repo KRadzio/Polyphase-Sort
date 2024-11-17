@@ -6,6 +6,7 @@
 #include <string>
 #include <random>
 #include <vector>
+#include <sstream>
 
 // standard page size
 #define BLOC_SIZE 4096 // 136 records, 16 bytes empty
@@ -20,6 +21,8 @@
 // it is smaller than any other string since it only contains \0
 #define EMPTY_RECORD ""
 
+#define UNUSED_BYTE '\0'
+
 class FileManager
 {
 
@@ -30,6 +33,7 @@ public:
     void DisplayEntireFile(std::string filename);
     void ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer);
     void WriteBlockToFile(std::string filename, std::vector<std::string> &buffer);
+    void ReplaceBlockInFile(std::string filename,int blockNum ,std::vector<std::string> &buffer); // replace a full block
     void ClearFile(std::string filename);
     void ClearBufferFromIndex(std::vector<std::string> &buffer, size_t index);
 

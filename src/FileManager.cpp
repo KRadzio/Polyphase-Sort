@@ -17,6 +17,7 @@ void FileManager::GenerateFile(int lineCount, std::string filename)
     {
         int r = rand();
         int len = r % 30 + 1;
+        int rest = RECORD_SIZE - len;
 
         for (int j = 0; j < len; j++)
         {
@@ -24,6 +25,9 @@ void FileManager::GenerateFile(int lineCount, std::string filename)
             char c = r % 94 + 33;
             file << c;
         }
+        for (int j = 0; j < rest; j++)
+            file << UNUSED_BYTE;
+
         file << std::endl;
     }
     file.close();
@@ -59,6 +63,7 @@ void FileManager::DisplayEntireFile(std::string filename)
 
 void FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer)
 {
+    // check for 0 maybe?
     std::ifstream file;
     file.open(filename);
     std::string line; // to read not needed data
@@ -66,7 +71,7 @@ void FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vec
     int maxRecords = BLOC_SIZE / RECORD_SIZE;
     int currBlockNum = 1;
 
-    while (currBlockNum != blockNum && !file.eof())
+    while (currBlockNum < blockNum && !file.eof())
     {
         for (int i = 0; i < maxRecords; i++)
             getline(file, line);
@@ -75,7 +80,7 @@ void FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vec
         {
             // std::cout << "Block: " << blockNum << " out of range" << std::endl;
             file.close();
-            ClearBufferFromIndex(buffer,0);
+            ClearBufferFromIndex(buffer, 0);
             return;
         }
     }
@@ -85,9 +90,17 @@ void FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vec
 
     while (recordCount < maxRecords && !file.eof())
     {
-        file >> buffer[recordCount];
+        std::string line;
+        getline(file, line);
+
+        std::stringstream ss(line);
+
+        // read as records with diffrent lengths, but we save with a fixed length
+        getline(ss, line, UNUSED_BYTE);
+
+        buffer[recordCount] = line;
+
         recordCount++;
-        // std::cout << "Record: " << recordCount<< " " << buffer[recordCount - 1] << std::endl;
     }
     if (file.eof() && recordCount < maxRecords && buffer[recordCount] != "") // clear unused cells
         ClearBufferFromIndex(buffer, recordCount);
@@ -100,9 +113,49 @@ void FileManager::WriteBlockToFile(std::string filename, std::vector<std::string
     std::ofstream file;
     file.open(filename, std::ios_base::app);
 
+    // every record needs to have a fixed number of characters
     for (size_t i = 0; i < buffer.size(); i++)
+    {
         if (buffer[i] != EMPTY_RECORD)
-            file << buffer[i] << std::endl;
+        {
+            file << buffer[i];
+            for (size_t j = buffer[i].size(); j < RECORD_SIZE; j++)
+                file << UNUSED_BYTE;
+            file << std::endl;
+        }
+    }
+
+    file.close();
+    ClearBufferFromIndex(buffer, 0);
+}
+
+void FileManager::ReplaceBlockInFile(std::string filename, int blockNum, std::vector<std::string> &buffer)
+{
+    std::fstream file;
+    file.open(filename);
+
+    int currBlockNum = 1;
+    int maxRecords = BLOC_SIZE / RECORD_SIZE;
+    std::string line;
+
+    while (currBlockNum != blockNum)
+    {
+        for (int i = 0; i < maxRecords; i++)
+            getline(file, line);
+        currBlockNum++;
+    }
+
+    // every record needs to have a fixed number of characters
+    for (size_t i = 0; i < buffer.size(); i++)
+    {
+        if (buffer[i] != EMPTY_RECORD)
+        {
+            file << buffer[i];
+            for (size_t j = buffer[i].size(); j < RECORD_SIZE; j++)
+                file << UNUSED_BYTE;
+            file << std::endl;
+        }
+    }
 
     file.close();
     ClearBufferFromIndex(buffer, 0);
