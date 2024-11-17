@@ -14,6 +14,7 @@ public:
     ~Tape();
 
     std::string GetNextRecord();
+    std::string GetRecordAhead(); // returns a record after current index
     void SetNextRecord(std::string newRecord);
 
     // if we merge two series the new record may not be in order
@@ -21,7 +22,7 @@ public:
     // we have to reorganize the serie in buffer
     void SetNextRecordAndSortSerie(std::string newRecord, bool start = false);
     std::string GetSerieEnd();
-    std::string GetSerieNextEnd();
+    std::string GetSerieNextEnd(); // returns first serie end after current index
     void SetNextSerieEnd(std::string newSerieEnd);
 
     void ResetIndexAndBuffer(); // used when tape has ended or its purpuse is swaped from read to write

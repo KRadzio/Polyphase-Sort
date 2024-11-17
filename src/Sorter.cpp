@@ -52,17 +52,26 @@ void Sorter::Sort(std::string inputTapeName)
 
     size_t currPhase = 0;
 
+     // something is wrong with serie end
+
     while (currPhase < numberOfPhases)
     {
         size_t seriesCount = 0;
-        size_t a = Fib(numberOfPhases - currPhase);
         while (seriesCount < Fib(numberOfPhases - currPhase))
         {
             bool serieEndedS = false;
             bool serieEndedL = false;
 
             std::string serieEndS = shorterTape->GetSerieEnd();
-            std::string serieEndL = longerTape->GetSerieEnd();
+            std::string serieEndL = EMPTY_RECORD;
+             if (dummyCount > 0)
+            {
+                serieEndedL = true;
+                dummyCount--;
+            }
+            else
+                serieEndL = longerTape->GetSerieEnd();
+            
 
             // choose new serie end
             if (serieEndS > serieEndL)
@@ -71,8 +80,8 @@ void Sorter::Sort(std::string inputTapeName)
                 emptyTape->SetNextSerieEnd(serieEndL);
             bool first = true;
 
-            // check for dupes !!!!!!
-            // there maybe some problems with merging if we run into dupes or when new blocks are loaded
+           
+            // problem with dupes
             while (!serieEndedS || !serieEndedL)
             {
                 if (!serieEndedS)
@@ -88,14 +97,29 @@ void Sorter::Sort(std::string inputTapeName)
                     else
                         emptyTape->SetNextRecordAndSortSerie(recordS);
                     if (recordS == serieEndS)
-                        serieEndedS = true;
+                    {
+                        if (shorterTape->GetSerieNextEnd() == serieEndS && shorterTape->GetRecordAhead() != serieEndS)
+                            serieEndedS = true;
+                        else if (shorterTape->GetSerieNextEnd() != serieEndS && shorterTape->GetRecordAhead() != serieEndS)
+                            serieEndedS = true;
+                        else
+                            serieEndedS = false;
+                    }
                 }
                 if (!serieEndedL)
                 {
                     std::string recordL = longerTape->GetNextRecord();
                     emptyTape->SetNextRecordAndSortSerie(recordL);
                     if (recordL == serieEndL)
-                        serieEndedL = true;
+                    {
+                        if(longerTape->GetSerieNextEnd() == serieEndL && longerTape->GetRecordAhead() != serieEndL)
+                            serieEndedL = true;
+                        else if (longerTape->GetSerieNextEnd() != serieEndL && longerTape->GetRecordAhead() != serieEndL)
+                            serieEndedL = true;
+                        else
+                            serieEndedL = false;
+                    }
+                        
                 }
             }
             seriesCount++;

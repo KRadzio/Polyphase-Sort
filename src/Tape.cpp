@@ -37,6 +37,24 @@ std::string Tape::GetNextRecord()
     return EMPTY_RECORD;
 }
 
+std::string Tape::GetRecordAhead()
+{
+    // since we first increment the index while getting next record
+    // we pick vectorOfRecords[index]
+    if (index < BLOC_SIZE / RECORD_SIZE)
+        return vectorOfRecords[index];
+    else
+    {
+        prevRecord = vectorOfRecords[index - 1];
+        index = 0;
+        blockNum++;
+        FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords);
+        if (vectorOfRecords[index] != EMPTY_RECORD)
+            return vectorOfRecords[index];
+    }
+    return EMPTY_RECORD;
+}
+
 void Tape::SetNextRecord(std::string newRecord)
 {
     if (newRecord == EMPTY_RECORD)
@@ -60,7 +78,7 @@ void Tape::SetNextRecord(std::string newRecord)
 void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool start)
 {
     // simple insert if new serie begins
-    if (start || index == 0)
+    if (start)
         SetNextRecord(newRecord);
     else
     {
@@ -68,7 +86,9 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool start)
             return;
         if (index < BLOC_SIZE / RECORD_SIZE)
         {
-            size_t currPos = index - 1;
+            size_t currPos = 0;
+            if (index != 0)
+                currPos = index - 1;
             if (newRecord < vectorOfRecords[currPos])
             {
                 while (newRecord < vectorOfRecords[currPos])
@@ -76,9 +96,11 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool start)
                     // move the record up
                     vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
                     vectorOfRecords[currPos] = newRecord;
+                    if (currPos == 0)
+                        break;
                     currPos--;
                 }
-                vectorOfRecords[currPos + 1] = newRecord;
+                // vectorOfRecords[currPos + 1] = newRecord;
                 index++;
                 return;
             }
@@ -92,7 +114,7 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool start)
             if (newRecord < vectorOfRecords[currPos])
             {
                 std::string recordToMove = vectorOfRecords[currPos];
-                while (newRecord < vectorOfRecords[currPos])
+                while (newRecord < vectorOfRecords[currPos] && recordToMove >= vectorOfRecords[currPos])
                 {
                     if (currPos < BLOC_SIZE / RECORD_SIZE - 1)
                     {
@@ -101,6 +123,8 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool start)
                     }
                     else
                         vectorOfRecords[currPos] = newRecord;
+                    if (currPos == 0)
+                        break;
                     currPos--;
                 }
                 FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
