@@ -45,7 +45,6 @@ private:
     FileManager();
     ~FileManager();
 
-// remember to increment them
 private:
     size_t reads = 0;
     size_t writes = 0;
