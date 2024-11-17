@@ -39,14 +39,17 @@ public:
 
     inline size_t GetReads() { return reads; }
     inline size_t GetWrites() { return writes; }
+    inline size_t GetFileAccesses() {return fileAcceses;}
 
 private:
     FileManager();
     ~FileManager();
 
+// remember to increment them
 private:
     size_t reads = 0;
     size_t writes = 0;
+    size_t fileAcceses = 0;
 };
 
 #endif

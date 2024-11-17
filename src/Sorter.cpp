@@ -25,30 +25,7 @@ void Sorter::Sort(std::string inputTapeName)
 
     // sorting
 
-    // set tapes
-    tape1.SetFile(TAPE1);
-    tape1.ResetIndexAndBuffer();
-    tape1.Clear();
-
-    Tape *shorterTape = nullptr;
-    Tape *longerTape = nullptr;
-    Tape *emptyTape = &tape1;
-
-    if (tape2.GetNumberOfSeries() == Fib(fibIndex - 2))
-    {
-        shorterTape = &tape2;
-        longerTape = &tape3;
-    }
-    if (tape3.GetNumberOfSeries() == Fib(fibIndex - 2))
-    {
-        shorterTape = &tape3;
-        longerTape = &tape2;
-    }
-
-    shorterTape->ResetIndexAndBuffer();
-    shorterTape->FillBuffer();
-    longerTape->ResetIndexAndBuffer();
-    longerTape->FillBuffer();
+    SetUpTapesBeforeSorting();
 
     size_t currPhase = 0;
 
@@ -59,9 +36,10 @@ void Sorter::Sort(std::string inputTapeName)
         {
             bool serieEndedS = false;
             bool serieEndedL = false;
-
             std::string serieEndS = shorterTape->GetSerieEnd();
             std::string serieEndL = EMPTY_RECORD;
+
+            // we first remove the dummy series
             if (dummyCount > 0)
             {
                 serieEndedL = true;
@@ -78,73 +56,17 @@ void Sorter::Sort(std::string inputTapeName)
             bool firstS = true;
             bool firstL = true;
 
-            // serie are to long at some point and they can take more than one page !!!
-            // this is the problem
-
+            // insert records until both series ended
             while (!serieEndedS || !serieEndedL)
             {
                 if (!serieEndedS)
-                {
-                    std::string recordS = shorterTape->GetNextRecord();
-                    // the record from the shorter tape will always be inserted first
-                    // so it will always start a serie
-                    if (firstS)
-                    {
-                        emptyTape->SetNextRecordAndSortSerie(recordS, true);
-                        firstS = false;
-                    }
-                    else
-                        emptyTape->SetNextRecordAndSortSerie(recordS);
-                    if (recordS == serieEndS)
-                    {
-                        if (shorterTape->GetSerieNextEnd() == serieEndS && shorterTape->GetRecordAhead() != serieEndS)
-                            serieEndedS = true;
-                        else if (shorterTape->GetSerieNextEnd() != serieEndS && shorterTape->GetRecordAhead() != serieEndS)
-                            serieEndedS = true;
-                        else
-                            serieEndedS = false;
-                    }
-                }
+                    InsertNewRecord(firstS, shorterTape, serieEndedS, serieEndS);
                 if (!serieEndedL)
-                {
-                    std::string recordL = longerTape->GetNextRecord();
-                    if (firstL)
-                    {
-                        emptyTape->SetNextRecordAndSortSerie(recordL, false, true);
-                        firstL = false;
-                    }
-                    else
-                        emptyTape->SetNextRecordAndSortSerie(recordL);
-                    if (recordL == serieEndL)
-                    {
-                        if (longerTape->GetSerieNextEnd() == serieEndL && longerTape->GetRecordAhead() != serieEndL)
-                            serieEndedL = true;
-                        else if (longerTape->GetSerieNextEnd() != serieEndL && longerTape->GetRecordAhead() != serieEndL)
-                            serieEndedL = true;
-                        else
-                            serieEndedL = false;
-                    }
-                }
+                    InsertNewRecord(firstL, longerTape, serieEndedL, serieEndL, true);
             }
             seriesCount++;
         }
-        // save since buffer is auto-saved only if full
-        emptyTape->Save();
-
-        // swap tapes
-        Tape *tmp = emptyTape;
-        emptyTape = shorterTape;
-        shorterTape = longerTape;
-        longerTape = tmp;
-
-        // Clear the file and reset index in tape
-        emptyTape->Clear();
-        emptyTape->ResetIndexAndBuffer();
-        emptyTape->ResetSeriesEnd();
-
-        // Reset index on the previously empty tape (swap from write to read)
-        longerTape->ResetIndexAndBuffer();
-        longerTape->FillBuffer();
+        SwapAndClearTapes();
         currPhase++;
     }
 }
@@ -202,17 +124,11 @@ void Sorter::SplitToTapes(std::string inputTapeName)
     tape2.Save();
     tape3.Save();
 
-    if (turn % 2 == 1)
-        std::cout << "Tape 2 is longer" << std::endl;
-    else
-        std::cout << "Tape 3 is longer" << std::endl;
-
-    // and what if the input tape is sorted?
-    if (tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries() == 1)
-        std::cout << "File already sorted" << std::endl;
     numberOfPhases = fibIndex - 2;
     if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
+
+    std::cout << "Theoretical number of file accesses " << 2 * 1000 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
 
     std::cout << currFib << " " << fibIndex << " " << tape2.GetNumberOfSeries() << " " << tape3.GetNumberOfSeries() << " " << dummyCount << " " << numberOfPhases << std::endl;
 }
@@ -241,6 +157,79 @@ void Sorter::FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape)
         }
         else
             currTape.SetNextRecord(record);
+    }
+}
+
+void Sorter::SetUpTapesBeforeSorting()
+{
+    // clear tape one since it will be empty
+    tape1.SetFile(TAPE1);
+    tape1.ResetIndexAndBuffer();
+    tape1.Clear();
+    emptyTape = &tape1;
+
+    // pick the shorter one
+    if (tape2.GetNumberOfSeries() == Fib(fibIndex - 2))
+    {
+        shorterTape = &tape2;
+        longerTape = &tape3;
+    }
+    if (tape3.GetNumberOfSeries() == Fib(fibIndex - 2))
+    {
+        shorterTape = &tape3;
+        longerTape = &tape2;
+    }
+
+    // reset index
+    shorterTape->ResetIndexAndBuffer();
+    shorterTape->FillBuffer();
+    longerTape->ResetIndexAndBuffer();
+    longerTape->FillBuffer();
+}
+
+void Sorter::SwapAndClearTapes()
+{
+    // save since buffer is auto-saved only if full
+    emptyTape->Save();
+
+    // swap tapes
+    Tape *tmp = emptyTape;
+    emptyTape = shorterTape;
+    shorterTape = longerTape;
+    longerTape = tmp;
+
+    // Clear the file and reset index in tape
+    emptyTape->Clear();
+    emptyTape->ResetIndexAndBuffer();
+    emptyTape->ResetSeriesEnd();
+
+    // Reset index on the previously empty tape (swap from write to read)
+    longerTape->ResetIndexAndBuffer();
+    longerTape->FillBuffer();
+}
+
+void Sorter::InsertNewRecord(bool &first, Tape *tape, bool &serieEnded, std::string &serieEnd, bool longer)
+{
+    std::string record = tape->GetNextRecord();
+    if (first)
+    {
+        if (!longer)
+            emptyTape->SetNextRecordAndSortSerie(record, true);
+        else
+            emptyTape->SetNextRecordAndSortSerie(record, false, true);
+
+        first = false;
+    }
+    else
+        emptyTape->SetNextRecordAndSortSerie(record);
+    if (record == serieEnd)
+    {
+        if (tape->GetSerieNextEnd() == serieEnd && tape->GetRecordAhead() != serieEnd)
+            serieEnded = true;
+        else if (tape->GetSerieNextEnd() != serieEnd && tape->GetRecordAhead() != serieEnd)
+            serieEnded = true;
+        else
+            serieEnded = false;
     }
 }
 

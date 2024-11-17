@@ -227,6 +227,7 @@ void Tape::SetFileAndFillBuffer(std::string filename)
 }
 
 // this may need optimization
+// sometimes it puts a record out of order at the top
 void Tape::checkPrevBlocks(std::string newRecord, size_t currPos)
 {
     size_t currBlockNum = blockNum;
