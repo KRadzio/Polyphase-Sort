@@ -19,6 +19,7 @@ Sorter &Sorter::GetInstance()
     return *instance;
 }
 
+//here
 void Sorter::Sort(std::string inputTapeName)
 {
     SplitToTapes(inputTapeName); // dystribution
@@ -69,7 +70,7 @@ void Sorter::Sort(std::string inputTapeName)
         SwapAndClearTapes();
         currPhase++;
     }
-    emptyTape->Save();
+    longerTape->Save();
 }
 
 size_t Sorter::Fib(int n)
@@ -159,11 +160,13 @@ void Sorter::FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape)
     }
 }
 
+// here
 void Sorter::SetUpTapesBeforeSorting()
 {
     // clear tape one since it will be empty
     tape1.SetFile(TAPE1);
     tape1.ResetIndex(false);
+    tape1.ClearBuffer();
     tape1.Clear();
     emptyTape = &tape1;
 
@@ -183,7 +186,7 @@ void Sorter::SetUpTapesBeforeSorting()
     shorterTape->ResetIndex();
     longerTape->ResetIndex();
 }
-
+// here
 void Sorter::SwapAndClearTapes()
 {
     // save since buffer is auto-saved only if full
@@ -197,6 +200,7 @@ void Sorter::SwapAndClearTapes()
 
     // Clear the file and reset index in tape
     emptyTape->Clear();
+    emptyTape->ClearBuffer();
     emptyTape->ResetIndex();
     emptyTape->ResetSeriesEnd();
 
@@ -205,6 +209,7 @@ void Sorter::SwapAndClearTapes()
     //longerTape->FillBuffer();
 }
 
+//here
 void Sorter::InsertNewRecord(bool &first, Tape *tape, bool &serieEnded, std::string &serieEnd, bool longer)
 {
     std::string record = tape->GetNextRecord();

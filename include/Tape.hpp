@@ -26,7 +26,6 @@ public:
     std::string GetSerieNextEnd(); // returns first serie end after current index
     void SetNextSerieEnd(std::string newSerieEnd);
 
-    void ClearBuffer();
     void ResetIndex(bool save = true); // used when tape has ended or its purpuse is swaped from read to write
     void Save();
     void SetFileAndFillBuffer(std::string filename); // change file, reset index and load first block from new file

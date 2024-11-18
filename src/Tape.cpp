@@ -206,16 +206,16 @@ void Tape::SetNextSerieEnd(std::string newSerieEnd)
 
 void Tape::ResetIndex(bool save )
 {
+    if(blockNum > 1 && save)
+    {
+        FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
+        FileManager::GetInstance().ReadBlockFromFile(filename,1, vectorOfRecords);
+    }
     index = 0;
     seriesEndIndex = 0;
     blockNum = 1;
     prevRecord = EMPTY_RECORD;
     hasEnded = false;
-    if(blockNum > 1 && save)
-    {
-        FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-        FileManager::GetInstance().ReadBlockFromFile(filename,blockNum, vectorOfRecords);
-    }
 }
 
 void Tape::Save() { FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords); }
