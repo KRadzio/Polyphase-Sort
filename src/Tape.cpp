@@ -204,14 +204,18 @@ void Tape::SetNextSerieEnd(std::string newSerieEnd)
     seriesEndIndex++;
 }
 
-void Tape::ResetIndexAndBuffer()
+void Tape::ResetIndex(bool save )
 {
-    ClearBuffer();
     index = 0;
     seriesEndIndex = 0;
     blockNum = 1;
     prevRecord = EMPTY_RECORD;
     hasEnded = false;
+    if(blockNum > 1 && save)
+    {
+        FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
+        FileManager::GetInstance().ReadBlockFromFile(filename,blockNum, vectorOfRecords);
+    }
 }
 
 void Tape::Save() { FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords); }

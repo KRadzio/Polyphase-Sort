@@ -69,6 +69,7 @@ void Sorter::Sort(std::string inputTapeName)
         SwapAndClearTapes();
         currPhase++;
     }
+    emptyTape->Save();
 }
 
 size_t Sorter::Fib(int n)
@@ -120,15 +121,13 @@ void Sorter::SplitToTapes(std::string inputTapeName)
             turn++;
         }
     }
-    // save since the buffer are not saved until they are full
-    tape2.Save();
-    tape3.Save();
 
     numberOfPhases = fibIndex - 2;
     if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
 
-    std::cout << "Theoretical number of file accesses " << 2 * 1000 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
+    // something is wrong here
+    std::cout << "Theoretical number of file accesses " << 2 * 27 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
 
     std::cout << currFib << " " << fibIndex << " " << tape2.GetNumberOfSeries() << " " << tape3.GetNumberOfSeries() << " " << dummyCount << " " << numberOfPhases << std::endl;
 }
@@ -164,7 +163,7 @@ void Sorter::SetUpTapesBeforeSorting()
 {
     // clear tape one since it will be empty
     tape1.SetFile(TAPE1);
-    tape1.ResetIndexAndBuffer();
+    tape1.ResetIndex(false);
     tape1.Clear();
     emptyTape = &tape1;
 
@@ -181,16 +180,14 @@ void Sorter::SetUpTapesBeforeSorting()
     }
 
     // reset index
-    shorterTape->ResetIndexAndBuffer();
-    shorterTape->FillBuffer();
-    longerTape->ResetIndexAndBuffer();
-    longerTape->FillBuffer();
+    shorterTape->ResetIndex();
+    longerTape->ResetIndex();
 }
 
 void Sorter::SwapAndClearTapes()
 {
     // save since buffer is auto-saved only if full
-    emptyTape->Save();
+    //emptyTape->Save();
 
     // swap tapes
     Tape *tmp = emptyTape;
@@ -200,12 +197,12 @@ void Sorter::SwapAndClearTapes()
 
     // Clear the file and reset index in tape
     emptyTape->Clear();
-    emptyTape->ResetIndexAndBuffer();
+    emptyTape->ResetIndex();
     emptyTape->ResetSeriesEnd();
 
     // Reset index on the previously empty tape (swap from write to read)
-    longerTape->ResetIndexAndBuffer();
-    longerTape->FillBuffer();
+    longerTape->ResetIndex();
+    //longerTape->FillBuffer();
 }
 
 void Sorter::InsertNewRecord(bool &first, Tape *tape, bool &serieEnded, std::string &serieEnd, bool longer)
