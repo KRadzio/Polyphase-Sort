@@ -203,7 +203,7 @@ void Sorter::SwapAndClearTapes()
     // Clear the file and reset index in tape
     emptyTape->Clear();
     emptyTape->ClearBuffer();
-    emptyTape->ResetIndex();
+    emptyTape->ResetIndex(false);
     emptyTape->ResetSeriesEnd();
 
     // Reset index on the previously empty tape (swap from write to read)

@@ -11,35 +11,23 @@ Tape::~Tape() { vectorOfRecords.clear(); }
 
 std::string Tape::GetNextRecord()
 {
-    if (index < BLOC_SIZE / RECORD_SIZE)
-    {
-        if (index > 0)
-            prevRecord = vectorOfRecords[index - 1];
-        index++;
-        if (vectorOfRecords[index - 1] != EMPTY_RECORD)
-            return vectorOfRecords[index - 1];
-        else
-        {
-            hasEnded = true;
-            return EMPTY_RECORD;
-        }
-    }
-    if (index == BLOC_SIZE / RECORD_SIZE && vectorOfRecords[index - 1] != EMPTY_RECORD)
+    if (index > 0)
+        prevRecord = vectorOfRecords[index - 1];
+    if (index == BLOC_SIZE / RECORD_SIZE)
     {
         prevRecord = vectorOfRecords[index - 1];
         index = 0;
         blockNum++;
         FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords);
-        if (vectorOfRecords[index] != EMPTY_RECORD)
-        {
-            index++; // increment index since we return the first element of new block
-            return vectorOfRecords[index - 1];
-        }
     }
-    if (vectorOfRecords[index] == EMPTY_RECORD)
+
+    std::string tmp = vectorOfRecords[index];
+    index++;
+
+    if (tmp == EMPTY_RECORD)
         hasEnded = true;
 
-    return EMPTY_RECORD;
+    return tmp;
 }
 
 std::string Tape::GetRecordAhead()
@@ -204,12 +192,12 @@ void Tape::SetNextSerieEnd(std::string newSerieEnd)
     seriesEndIndex++;
 }
 
-void Tape::ResetIndex(bool save )
+void Tape::ResetIndex(bool save)
 {
-    if(blockNum > 1 && save)
+    if (blockNum > 1 && save)
     {
         FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-        FileManager::GetInstance().ReadBlockFromFile(filename,1, vectorOfRecords);
+        FileManager::GetInstance().ReadBlockFromFile(filename, 1, vectorOfRecords);
     }
     index = 0;
     seriesEndIndex = 0;
@@ -247,7 +235,7 @@ void Tape::checkPrevBlocks(std::string newRecord, size_t currPos)
     }
     else // we found the place
         return;
-    if(currBlockNum == 0) // this may happen
+    if (currBlockNum == 0) // this may happen
         return;
     while (newRecord < swapBuffer[currPos])
     {
