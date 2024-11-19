@@ -50,23 +50,14 @@ std::string Tape::GetRecordAhead()
 
 void Tape::SetNextRecord(std::string newRecord)
 {
-    if (newRecord == EMPTY_RECORD)
-        return;
-    if (index < BLOC_SIZE / RECORD_SIZE)
-    {
-        vectorOfRecords[index] = newRecord;
-        index++;
-        return;
-    }
     if (index == BLOC_SIZE / RECORD_SIZE)
     {
         FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
         index = 0;
         blockNum++;
-        vectorOfRecords[index] = newRecord;
-        index++;
-        return;
     }
+    vectorOfRecords[index] = newRecord;
+    index++;
 }
 
 void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool startS, bool startL)
