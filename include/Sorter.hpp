@@ -20,7 +20,9 @@ private:
     void FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape);
     void SetUpTapesBeforeSorting();
     void SwapAndClearTapes();
-    void InsertNewRecord(bool &first, Tape *tape, bool &serieEnded, std::string& serieEnd, bool longer = false); // bool references aren't the best thing
+    void FillWithShorterTapeSerie(std::string& recordS);
+    void MergeTwoSeries(std::string& recordS, std::string& recordL);
+    void PutRecordsInOrder(std::string& recordS, std::string& recordL, bool firstTwoRecordsInsert = false);
     int FindClosestFibNumberIndex(size_t seriesCount);
 
 private:

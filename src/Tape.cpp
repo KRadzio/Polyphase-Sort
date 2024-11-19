@@ -30,28 +30,11 @@ std::string Tape::GetNextRecord()
     return tmp;
 }
 
-std::string Tape::GetRecordAhead()
-{
-    // since we first increment the index while getting next record
-    // we pick vectorOfRecords[index]
-    if (index < BLOC_SIZE / RECORD_SIZE)
-        return vectorOfRecords[index];
-    else
-    {
-        prevRecord = vectorOfRecords[index - 1];
-        index = 0;
-        blockNum++;
-        FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords);
-        if (vectorOfRecords[index] != EMPTY_RECORD)
-            return vectorOfRecords[index];
-    }
-    return EMPTY_RECORD;
-}
-
 void Tape::SetNextRecord(std::string newRecord)
 {
     if (index == BLOC_SIZE / RECORD_SIZE)
     {
+        prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
         FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
         index = 0;
         blockNum++;
@@ -60,52 +43,20 @@ void Tape::SetNextRecord(std::string newRecord)
     index++;
 }
 
-void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool startS, bool startL)
+void Tape::SetNextRecordAndSortSerie(std::string newRecord)
 {
-    // simple insert if new serie begins
-    if (startS)
-        SetNextRecord(newRecord);
-    else if (startL) // default insert
+    // do not insert a empty record
+    if (newRecord == EMPTY_RECORD)
+        return;
+    if (index != 0)
     {
-        size_t currPos = 0;
-        if (index != 0)
-            currPos = index - 1;
-        if (newRecord < vectorOfRecords[currPos])
+        if (index == BLOC_SIZE / RECORD_SIZE)
         {
-            if (currPos == BLOC_SIZE / RECORD_SIZE - 1)
+            std::string tmp = vectorOfRecords[index - 1];
+            if (newRecord < tmp)
             {
-                std::string tmp = vectorOfRecords[currPos];
-                vectorOfRecords[currPos] = newRecord;
-                index = 0;
-                FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-                vectorOfRecords[index] = tmp;
-                blockNum++;
-                index++;
-                return;
-            }
-            else
-            {
-                vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
-                vectorOfRecords[currPos] = newRecord;
-                index++;
-                return;
-            }
-        }
-        else // in order so use the regular insert
-            SetNextRecord(newRecord);
-    }
-    else
-    {
-        // also check if it is in previous blocks
-        if (newRecord == EMPTY_RECORD)
-            return;
-        if (index < BLOC_SIZE / RECORD_SIZE)
-        {
-            size_t currPos = 0;
-            if (index != 0)
-                currPos = index - 1;
-            if (newRecord < vectorOfRecords[currPos])
-            {
+                vectorOfRecords[index - 1] = newRecord;
+                size_t currPos = index - 2;
                 while (newRecord < vectorOfRecords[currPos])
                 {
                     // move the record up
@@ -117,46 +68,53 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord, bool startS, bool st
                 }
                 if (currPos == 0) // check previous blocks
                     checkPrevBlocks(newRecord, currPos);
-                index++;
-                return;
-            }
-            else // in order so use the regular insert
-                SetNextRecord(newRecord);
-            return;
-        }
-        if (index == BLOC_SIZE / RECORD_SIZE)
-        {
-            size_t currPos = index - 1;
-            if (newRecord < vectorOfRecords[currPos])
-            {
-                std::string recordToMove = vectorOfRecords[currPos];
-                while (newRecord < vectorOfRecords[currPos] && recordToMove >= vectorOfRecords[currPos])
-                {
-                    if (currPos < BLOC_SIZE / RECORD_SIZE - 1)
-                    {
-                        vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
-                        vectorOfRecords[currPos] = newRecord;
-                    }
-                    else
-                        vectorOfRecords[currPos] = newRecord;
-                    if (currPos == 0)
-                        break;
-                    currPos--;
-                }
-                if (currPos == 0) // check prev blocks
-                    checkPrevBlocks(newRecord, currPos);
 
+                prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
                 FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
                 index = 0;
-                vectorOfRecords[index] = recordToMove;
                 blockNum++;
+                vectorOfRecords[index] = tmp;
+                index++;
+
+                return;
+            }
+            else
+            {
+                prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
+                FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
+                index = 0;
+                blockNum++;
+                vectorOfRecords[index] = newRecord;
                 index++;
                 return;
             }
-            else // in order so use the regular insert
-                SetNextRecord(newRecord);
+        }
+        size_t currPos = index - 1;
+        if (newRecord < vectorOfRecords[currPos])
+        {
+            while (newRecord < vectorOfRecords[currPos])
+            {
+                // move the record up
+                vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
+                vectorOfRecords[currPos] = newRecord;
+                if (currPos == 0)
+                    break;
+                currPos--;
+            }
+            if (currPos == 0) // check previous blocks
+                checkPrevBlocks(newRecord, currPos);
+            index++;
             return;
         }
+        else // in order
+            SetNextRecord(newRecord);
+    }
+    else if (index == 0 && blockNum == 1) // standard insert
+        SetNextRecord(newRecord);
+    else
+    {
+        if (newRecord < prevRecord) // we save the prev record from last block
+            checkPrevBlocks(newRecord, BLOC_SIZE / RECORD_SIZE - 1);
     }
 }
 
@@ -165,14 +123,6 @@ std::string Tape::GetSerieEnd()
     seriesEndIndex++;
     if (seriesEndIndex <= seriesEnd.size())
         return seriesEnd[seriesEndIndex - 1];
-    else
-        return EMPTY_RECORD;
-}
-
-std::string Tape::GetSerieNextEnd()
-{
-    if (seriesEndIndex < seriesEnd.size())
-        return seriesEnd[seriesEndIndex];
     else
         return EMPTY_RECORD;
 }
@@ -198,6 +148,7 @@ void Tape::ResetIndex(bool save)
 }
 
 void Tape::Save() { FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords); }
+
 void Tape::SetFileAndFillBuffer(std::string filename)
 {
     this->filename = filename;
@@ -214,8 +165,9 @@ void Tape::SetFileAndFillBuffer(std::string filename)
 void Tape::checkPrevBlocks(std::string newRecord, size_t currPos)
 {
     size_t currBlockNum = blockNum;
-    currPos = BLOC_SIZE / RECORD_SIZE - 1;
     currBlockNum--;
+    if (currBlockNum == 0) // no need to check further
+        return;
     if (currBlockNum > 0)
         FileManager::GetInstance().ReadBlockFromFile(filename, currBlockNum, swapBuffer);
     if (newRecord < swapBuffer[currPos])
@@ -226,8 +178,7 @@ void Tape::checkPrevBlocks(std::string newRecord, size_t currPos)
     }
     else // we found the place
         return;
-    if (currBlockNum == 0) // this may happen
-        return;
+
     while (newRecord < swapBuffer[currPos])
     {
         swapBuffer[currPos + 1] = swapBuffer[currPos];
@@ -242,6 +193,8 @@ void Tape::checkPrevBlocks(std::string newRecord, size_t currPos)
                 tmpV[i] = swapBuffer[i];
             currPos = BLOC_SIZE / RECORD_SIZE - 1;
             currBlockNum--;
+            if (currBlockNum == 0)
+                break;
             if (currBlockNum > 0)
                 FileManager::GetInstance().ReadBlockFromFile(filename, currBlockNum, swapBuffer);
             if (newRecord < swapBuffer[currPos])
@@ -251,6 +204,8 @@ void Tape::checkPrevBlocks(std::string newRecord, size_t currPos)
                 swapBuffer[currPos] = newRecord;
                 currPos--;
             }
+            else // we found the place
+                break;
         }
     }
     FileManager::GetInstance().ReplaceBlockInFile(filename, currBlockNum, swapBuffer);
