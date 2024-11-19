@@ -67,10 +67,12 @@ void Sorter::Sort(std::string inputTapeName)
             }
             seriesCount++;
         }
-        SwapAndClearTapes();
         currPhase++;
+        if(currPhase < numberOfPhases)
+            SwapAndClearTapes();
+        
     }
-    longerTape->Save();
+    emptyTape->Save();
 }
 
 size_t Sorter::Fib(int n)
@@ -128,7 +130,7 @@ void Sorter::SplitToTapes(std::string inputTapeName)
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
 
     // something is wrong here
-    std::cout << "Theoretical number of file accesses " << 2 * 27 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
+    std::cout << "Theoretical number of file accesses " << 2 * 270 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
 
     std::cout << currFib << " " << fibIndex << " " << tape2.GetNumberOfSeries() << " " << tape3.GetNumberOfSeries() << " " << dummyCount << " " << numberOfPhases << std::endl;
 }
@@ -206,7 +208,6 @@ void Sorter::SwapAndClearTapes()
 
     // Reset index on the previously empty tape (swap from write to read)
     longerTape->ResetIndex();
-    //longerTape->FillBuffer();
 }
 
 //here
