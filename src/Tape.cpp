@@ -45,77 +45,48 @@ void Tape::SetNextRecord(std::string newRecord)
 
 void Tape::SetNextRecordAndSortSerie(std::string newRecord)
 {
-    // do not insert a empty record
-    if (newRecord == EMPTY_RECORD)
-        return;
-    if (index != 0)
+    if (index == 0 && blockNum == 1) // standard insert
     {
-        if (index == BLOC_SIZE / RECORD_SIZE)
-        {
-            std::string tmp = vectorOfRecords[index - 1];
-            if (newRecord < tmp)
-            {
-                vectorOfRecords[index - 1] = newRecord;
-                size_t currPos = index - 2;
-                while (newRecord < vectorOfRecords[currPos])
-                {
-                    // move the record up
-                    vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
-                    vectorOfRecords[currPos] = newRecord;
-                    if (currPos == 0)
-                        break;
-                    currPos--;
-                }
-                if (currPos == 0) // check previous blocks
-                    checkPrevBlocks(newRecord, currPos);
-
-                prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
-                FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-                index = 0;
-                blockNum++;
-                vectorOfRecords[index] = tmp;
-                index++;
-
-                return;
-            }
-            else
-            {
-                prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
-                FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-                index = 0;
-                blockNum++;
-                vectorOfRecords[index] = newRecord;
-                index++;
-                return;
-            }
-        }
-        size_t currPos = index - 1;
-        if (newRecord < vectorOfRecords[currPos])
-        {
-            while (newRecord < vectorOfRecords[currPos])
-            {
-                // move the record up
-                vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
-                vectorOfRecords[currPos] = newRecord;
-                if (currPos == 0)
-                    break;
-                currPos--;
-            }
-            if (currPos == 0) // check previous blocks
-                checkPrevBlocks(newRecord, currPos);
-            index++;
-            return;
-        }
-        else // in order
-            SetNextRecord(newRecord);
-    }
-    else if (index == 0 && blockNum == 1) // standard insert
         SetNextRecord(newRecord);
-    else
-    {
+        return;
+    }
+
+    if (index == 0)
         if (newRecord < prevRecord) // we save the prev record from last block
             checkPrevBlocks(newRecord, BLOC_SIZE / RECORD_SIZE - 1);
+
+    if (index == BLOC_SIZE / RECORD_SIZE)
+    {
+        prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
+        FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
+        index = 1;
+        blockNum++;
+        if (newRecord < prevRecord)
+            checkPrevBlocks(newRecord, BLOC_SIZE / RECORD_SIZE - 1);
+        else
+            vectorOfRecords[0] = newRecord;
+        return;
     }
+
+    size_t currPos = index - 1;
+    if (newRecord < vectorOfRecords[currPos])
+    {
+        while (newRecord < vectorOfRecords[currPos])
+        {
+            // move the record up
+            vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
+            vectorOfRecords[currPos] = newRecord;
+            if (currPos == 0)
+                break;
+            currPos--;
+        }
+        if (currPos == 0) // check previous blocks
+            checkPrevBlocks(newRecord, currPos);
+        index++;
+        return;
+    }
+    else // in order
+        SetNextRecord(newRecord);
 }
 
 std::string Tape::GetSerieEnd()
