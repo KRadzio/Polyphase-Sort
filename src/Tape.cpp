@@ -65,8 +65,6 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord)
                     break;
                 currPos--;
             }
-          //  if (currPos == 0) // check previous blocks
-            //    checkPrevBlocks(newRecord);
             FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
             index = 1;
             blockNum++;
@@ -95,8 +93,6 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord)
                 break;
             currPos--;
         }
- //       if (currPos == 0) // check previous blocks
-   //         checkPrevBlocks(newRecord);
         index++;
         return;
     }
@@ -144,54 +140,4 @@ void Tape::SetFileAndFillBuffer(std::string filename)
     blockNum = 1;
     prevRecord = EMPTY_RECORD;
     hasEnded = false;
-}
-
-// this may need optimization
-// sometimes it puts a record out of order at the top
-void Tape::checkPrevBlocks(std::string newRecord)
-{
-    size_t currPos = BLOC_SIZE / RECORD_SIZE - 1;
-    size_t currBlockNum = blockNum;
-    currBlockNum--;
-    if (currBlockNum == 0) // no need to check further
-        return;
-    if (currBlockNum > 0)
-        FileManager::GetInstance().ReadBlockFromFile(filename, currBlockNum, swapBuffer);
-    if (newRecord < swapBuffer[currPos])
-    {
-        vectorOfRecords[0] = swapBuffer[currPos];
-        swapBuffer[currPos] = newRecord;
-        currPos--;
-    }
-    else // we found the place
-        return;
-
-    while (newRecord < swapBuffer[currPos])
-    {
-        swapBuffer[currPos + 1] = swapBuffer[currPos];
-        swapBuffer[currPos] = newRecord;
-        currPos--;
-        if (currPos == 0)
-        {
-            // at 0
-            swapBuffer[currPos + 1] = swapBuffer[currPos];
-            swapBuffer[currPos] = newRecord;
-            for (size_t i = 0; i < swapBuffer.size(); i++)
-                tmpV[i] = swapBuffer[i];
-            currPos = BLOC_SIZE / RECORD_SIZE - 1;
-            currBlockNum--;
-            if (currBlockNum == 0)
-                break;
-            if (currBlockNum > 0)
-                FileManager::GetInstance().ReadBlockFromFile(filename, currBlockNum, swapBuffer);
-            if (newRecord < swapBuffer[currPos])
-            {
-                tmpV[0] = swapBuffer[currPos];
-                FileManager::GetInstance().ReplaceBlockInFile(filename, currBlockNum + 1, tmpV);
-                swapBuffer[currPos] = newRecord;
-                currPos--;
-            }
-        }
-    }
-    FileManager::GetInstance().ReplaceBlockInFile(filename, currBlockNum, swapBuffer);
 }

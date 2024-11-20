@@ -111,7 +111,7 @@ void Sorter::SplitToTapes(std::string inputTapeName)
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
 
     // something is wrong here
-    std::cout << "Theoretical number of file accesses " << 2 * 10000 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
+    std::cout << "Theoretical number of file accesses " << 2 * 1000 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
 
     std::cout << currFib << " " << fibIndex << " " << tape2.GetNumberOfSeries() << " " << tape3.GetNumberOfSeries() << " " << dummyCount << " " << numberOfPhases << std::endl;
 }
@@ -236,6 +236,8 @@ void Sorter::MergeTwoSeries(std::string &recordS, std::string &recordL)
         recordS = shorterTape->GetNextRecord();
         PutRecordsInOrder(recordS, recordL, true);
     }
+
+    // this loop may sometimes not finish
     while (!serieEndedS || !serieEndedL)
     {
         if (!serieEndedS)
