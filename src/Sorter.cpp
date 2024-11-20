@@ -51,7 +51,12 @@ void Sorter::Sort(std::string inputTapeName)
         }
         currPhase++;
         if (currPhase < numberOfPhases)
-            SwapAndClearTapes();
+        {
+             SwapAndClearTapes();
+             recordS = recordL;
+             recordL = EMPTY_RECORD;
+        }
+           
     }
     emptyTape->Save();
 }
