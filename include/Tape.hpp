@@ -42,7 +42,7 @@ public:
     inline size_t GetNumberOfSeries() { return numberOfSeries; }
 
 private:
-    void checkPrevBlocks(std::string newRecord, size_t currPos);
+    void checkPrevBlocks(std::string newRecord);
 
 private:
     std::vector<std::string> vectorOfRecords;

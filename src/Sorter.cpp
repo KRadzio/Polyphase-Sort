@@ -32,6 +32,7 @@ void Sorter::Sort(std::string inputTapeName)
     std::string recordS = EMPTY_RECORD; // if we reached the end of shorter tape this will be reseted to EMPTY_RECORD
     std::string recordL = EMPTY_RECORD;
 
+    // phase 6 something breaks
     while (currPhase < numberOfPhases)
     {
         size_t seriesCount = 0;
