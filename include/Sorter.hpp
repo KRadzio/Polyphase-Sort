@@ -22,7 +22,7 @@ private:
     void SwapAndClearTapes();
     void FillWithShorterTapeSerie(std::string& recordS);
     void MergeTwoSeries(std::string& recordS, std::string& recordL);
-    void PutRecordsInOrder(std::string& recordS, std::string& recordL, bool firstTwoRecordsInsert = false);
+    void InsertNextRecord(std::string& recordS, std::string& recordL);
     int FindClosestFibNumberIndex(size_t seriesCount);
 
 private:

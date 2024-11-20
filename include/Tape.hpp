@@ -20,7 +20,6 @@ public:
     // if we merge two series the new record may not be in order
     // example: we have "a" and "c" in the buffer and we want to add "b"
     // we have to reorganize the serie in buffer
-    void SetNextRecordAndSortSerie(std::string newRecord);
     std::string GetSerieEnd();
     void SetNextSerieEnd(std::string newSerieEnd);
 

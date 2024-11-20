@@ -225,68 +225,51 @@ void Sorter::MergeTwoSeries(std::string &recordS, std::string &recordL)
 
     // new serie begin
     if (recordS != EMPTY_RECORD && recordL != EMPTY_RECORD)
-        PutRecordsInOrder(recordS, recordL, true);
+        InsertNextRecord(recordS, recordL);
     else if (recordS != EMPTY_RECORD) // after dummy series
     {
         recordL = longerTape->GetNextRecord();
-        PutRecordsInOrder(recordS, recordL, true);
+        InsertNextRecord(recordS, recordL);
     }
     else if (recordL != EMPTY_RECORD) // if shorter tape ended
     {
         recordS = shorterTape->GetNextRecord();
-        PutRecordsInOrder(recordS, recordL, true);
+        InsertNextRecord(recordS, recordL);
     }
 
-    // this loop may sometimes not finish
     while (!serieEndedS || !serieEndedL)
     {
-        if (!serieEndedS)
-            recordS = shorterTape->GetNextRecord();
-        if (!serieEndedL)
-            recordL = longerTape->GetNextRecord();
-
         if (shorterTape->GetPrevRecord() == serieEndS && recordS != serieEndS)
             serieEndedS = true;
         if (longerTape->GetPrevRecord() == serieEndL && recordL != serieEndL)
             serieEndedL = true;
 
         if (!serieEndedL && !serieEndedS)
-            PutRecordsInOrder(recordS, recordL);
+            InsertNextRecord(recordS, recordL);
         else if (!serieEndedL)
-            emptyTape->SetNextRecordAndSortSerie(recordL);
+        {
+            emptyTape->SetNextRecord(recordL);
+            recordL = longerTape->GetNextRecord();
+        }
         else if (!serieEndedS)
-            emptyTape->SetNextRecordAndSortSerie(recordS);
+        {
+            emptyTape->SetNextRecord(recordS);
+            recordS = shorterTape->GetNextRecord();
+        }         
     }
 }
 
-void Sorter::PutRecordsInOrder(std::string &recordS, std::string &recordL, bool firstTwoRecordsInsert)
+void Sorter::InsertNextRecord(std::string &recordS, std::string &recordL)
 {
-    // the records in a serie have to be sorted and a serie can span over more than one block !
-    if (!firstTwoRecordsInsert)
+    if (recordL > recordS)
     {
-        if (recordL > recordS)
-        {
-            emptyTape->SetNextRecordAndSortSerie(recordS);
-            emptyTape->SetNextRecordAndSortSerie(recordL);
-        }
-        else
-        {
-            emptyTape->SetNextRecordAndSortSerie(recordL);
-            emptyTape->SetNextRecordAndSortSerie(recordS);
-        }
+        emptyTape->SetNextRecord(recordS);
+        recordS = shorterTape->GetNextRecord();
     }
-    else // the first two records start the serie so we do a regular insert with no checks to records before
+    else
     {
-        if (recordL > recordS)
-        {
-            emptyTape->SetNextRecord(recordS);
-            emptyTape->SetNextRecord(recordL);
-        }
-        else
-        {
-            emptyTape->SetNextRecord(recordL);
-            emptyTape->SetNextRecord(recordS);
-        }
+        emptyTape->SetNextRecord(recordL);
+        recordL = longerTape->GetNextRecord();
     }
 }
 

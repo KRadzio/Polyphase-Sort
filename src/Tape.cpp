@@ -42,64 +42,6 @@ void Tape::SetNextRecord(std::string newRecord)
     index++;
 }
 
-void Tape::SetNextRecordAndSortSerie(std::string newRecord)
-{
-    if (index == 0 && blockNum == 1) // standard insert
-    {
-        SetNextRecord(newRecord);
-        return;
-    }
-
-    if (index == BLOC_SIZE / RECORD_SIZE)
-    {
-        std::string tmp = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
-        if (newRecord < tmp)
-        {
-            size_t currPos = index - 2;
-            while (newRecord < vectorOfRecords[currPos])
-            {
-                // move the record up
-                vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
-                vectorOfRecords[currPos] = newRecord;
-                if (currPos == 0)
-                    break;
-                currPos--;
-            }
-            FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-            index = 1;
-            blockNum++;
-            vectorOfRecords[0] = tmp;
-            return;
-        }
-        else
-        {
-            FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
-            index = 1;
-            blockNum++;
-            vectorOfRecords[0] = newRecord;
-            return;
-        }
-    }
-
-    size_t currPos = index - 1;
-    if (newRecord < vectorOfRecords[currPos])
-    {
-        while (newRecord < vectorOfRecords[currPos])
-        {
-            // move the record up
-            vectorOfRecords[currPos + 1] = vectorOfRecords[currPos];
-            vectorOfRecords[currPos] = newRecord;
-            if (currPos == 0)
-                break;
-            currPos--;
-        }
-        index++;
-        return;
-    }
-    else // in order
-        SetNextRecord(newRecord);
-}
-
 std::string Tape::GetSerieEnd()
 {
     seriesEndIndex++;
