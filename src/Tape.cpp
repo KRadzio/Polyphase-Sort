@@ -34,7 +34,6 @@ void Tape::SetNextRecord(std::string newRecord)
 {
     if (index == BLOC_SIZE / RECORD_SIZE)
     {
-        prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
         FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
         index = 0;
         blockNum++;
@@ -53,8 +52,8 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord)
 
     if (index == BLOC_SIZE / RECORD_SIZE)
     {
-        prevRecord = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
-        if (newRecord < prevRecord)
+        std::string tmp = vectorOfRecords[BLOC_SIZE / RECORD_SIZE - 1];
+        if (newRecord < tmp)
         {
             size_t currPos = index - 2;
             while (newRecord < vectorOfRecords[currPos])
@@ -66,12 +65,12 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord)
                     break;
                 currPos--;
             }
-            if (currPos == 0) // check previous blocks
-                checkPrevBlocks(newRecord);
+          //  if (currPos == 0) // check previous blocks
+            //    checkPrevBlocks(newRecord);
             FileManager::GetInstance().WriteBlockToFile(filename, vectorOfRecords);
             index = 1;
             blockNum++;
-            vectorOfRecords[0] = prevRecord;
+            vectorOfRecords[0] = tmp;
             return;
         }
         else
@@ -96,8 +95,8 @@ void Tape::SetNextRecordAndSortSerie(std::string newRecord)
                 break;
             currPos--;
         }
-        if (currPos == 0) // check previous blocks
-            checkPrevBlocks(newRecord);
+ //       if (currPos == 0) // check previous blocks
+   //         checkPrevBlocks(newRecord);
         index++;
         return;
     }
