@@ -5,7 +5,12 @@ App::App()
     initscr();
     start_color();
 }
-App::~App() { endwin(); }
+App::~App()
+{
+    echo();
+    curs_set(1);
+    endwin();
+}
 
 App &App::GetInstance()
 {
@@ -15,6 +20,7 @@ App &App::GetInstance()
 
 void App::Experiment()
 {
+    clear();
     Sorter::GetInstance().Sort("./tapes/test.txt", true);
     Sorter::GetInstance().Sort("./tapes/test2.txt", true);
     Sorter::GetInstance().Sort("./tapes/test3.txt", true);

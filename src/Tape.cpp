@@ -89,7 +89,7 @@ void Tape::Diplay()
     char buffer[31];
     buffer[30] = '\0';
     file.open(filename);
-    for (size_t i = 1; i < blockNum; i++)
+    for (size_t i = 1; i <= blockNum; i++)
     {
         for (int j = 0; j < BLOC_SIZE / RECORD_SIZE; j++)
         {

@@ -130,8 +130,6 @@ size_t Sorter::Fib(int n)
 
 void Sorter::SplitToTapes(std::string inputTapeName, bool skip)
 {
-    FileManager::GetInstance().ClearFile(TAPE2);
-    FileManager::GetInstance().ClearFile(TAPE3);
     tape1.SetFileAndFillBuffer(inputTapeName);
 
     currFib = Fib(fibIndex);

@@ -16,36 +16,41 @@ public:
     Tape();
     ~Tape();
 
+    // getting and setting records
     std::string GetNextRecord();
+    inline std::string GetPrevRecord() { return prevRecord; }
     void SetNextRecord(std::string newRecord);
 
+    // serie end operations
     std::string GetSerieEnd();
     void SetNextSerieEnd(std::string newSerieEnd);
+    inline void ResetSeriesEnd() { seriesEnd.clear(); }
 
+    // reseting tapes after phase
     void ResetIndex(bool save = true); // used when tape has ended or its purpuse is swaped from read to write
-    void Save();
+    void Save(); // save buffer (used after sorting is done to save the last block that may not be full)
     void SetFileAndFillBuffer(std::string filename); // change file, reset index and load first block from new file
+    inline void ClearBuffer() { FileManager::GetInstance().ClearBufferFromIndex(vectorOfRecords, 0); }
 
     void Diplay();
 
-    inline void ResetSerieCount() { numberOfSeries = 0; }
-    inline void ClearBuffer() { FileManager::GetInstance().ClearBufferFromIndex(vectorOfRecords, 0); }
-    inline void FillBuffer() { FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords); }
-
-    inline void ResetSeriesEnd() { seriesEnd.clear(); }
+    // file operation
     inline void Clear() { FileManager::GetInstance().ClearFile(filename); } // to clear a file
     inline void SetFile(std::string filename) { this->filename = filename; }
+
+    // serie count
+    inline void ResetSerieCount() { numberOfInitialSeries = 0; }
+    inline void IncrementNumberOfSeries() { numberOfInitialSeries++; }
+    inline size_t GetNumberOfSeries() { return numberOfInitialSeries; } // returns INITIAl number of series (not used after distribution phase)
+
     inline bool HasEnded() { return hasEnded; }
-    inline std::string GetPrevRecord() { return prevRecord; }
-    inline void IncrementNumberOfSeries() { numberOfSeries++; }
-    inline size_t GetNumberOfSeries() { return numberOfSeries; }
 
 private:
     std::vector<std::string> vectorOfRecords;
     std::vector<std::string> seriesEnd; // used in first phase of mergeing
     size_t index = 0;
     size_t seriesEndIndex = 0;
-    size_t numberOfSeries = 0;
+    size_t numberOfInitialSeries = 0;
     size_t blockNum = 1;
     std::string filename;
     std::string prevRecord = EMPTY_RECORD;
