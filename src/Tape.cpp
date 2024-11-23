@@ -3,8 +3,6 @@
 Tape::Tape()
 {
     vectorOfRecords = std::vector<std::string>(BLOC_SIZE / RECORD_SIZE);
-    swapBuffer = std::vector<std::string>(BLOC_SIZE / RECORD_SIZE);
-    tmpV = std::vector<std::string>(BLOC_SIZE / RECORD_SIZE);
 }
 
 Tape::~Tape() { vectorOfRecords.clear(); }

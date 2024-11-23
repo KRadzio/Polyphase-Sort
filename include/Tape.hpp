@@ -16,7 +16,7 @@ public:
 
     std::string GetNextRecord();
     void SetNextRecord(std::string newRecord);
-    
+
     std::string GetSerieEnd();
     void SetNextSerieEnd(std::string newSerieEnd);
 
@@ -38,8 +38,6 @@ public:
 
 private:
     std::vector<std::string> vectorOfRecords;
-    std::vector<std::string> swapBuffer; // used when serie is longer than one block or a record needs to be placed in block than was already saved
-    std::vector<std::string> tmpV; // used when we reach index 0 in swapBuffer
     std::vector<std::string> seriesEnd; // used in first phase of mergeing
     size_t index = 0;
     size_t seriesEndIndex = 0;

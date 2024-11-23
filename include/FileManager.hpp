@@ -29,6 +29,7 @@ class FileManager
 public:
     static FileManager &GetInstance();
     void GenerateFile(int lineCount, std::string filename);
+    void WriteVectorToFile(std::string filename, std::vector<std::string>& vecotr);
     void GenerateEmptyFile(std::string filename);
     void DisplayEntireFile(std::string filename);
     void ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer);

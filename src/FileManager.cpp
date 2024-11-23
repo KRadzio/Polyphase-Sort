@@ -33,6 +33,21 @@ void FileManager::GenerateFile(int lineCount, std::string filename)
     file.close();
 }
 
+void FileManager::WriteVectorToFile(std::string filename, std::vector<std::string> &vecotr)
+{
+    std::ofstream file;
+    file.open(filename);
+    for (size_t i = 0; i < vecotr.size(); i++)
+    {
+        size_t rest = RECORD_SIZE - vecotr[i].size();
+        file << vecotr[i];
+        for (size_t j = 0; j < rest; j++)
+            file << UNUSED_BYTE;
+        file << std::endl;
+    }
+    file.close();
+}
+
 void FileManager::GenerateEmptyFile(std::string filename)
 {
     std::ofstream file;
@@ -145,7 +160,7 @@ void FileManager::ReplaceBlockInFile(std::string filename, int blockNum, std::ve
         for (int i = 0; i < maxRecords; i++)
             getline(file, line);
         currBlockNum++;
-        if(file.eof()) // out of bounds
+        if (file.eof()) // out of bounds
         {
             file.close();
             return;

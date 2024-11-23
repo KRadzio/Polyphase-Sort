@@ -58,6 +58,12 @@ void App::GenerateRecords()
 {
     clear();
     char c = 0x00;
+    std::string filepathRandom = "./tapes/random.txt";
+    std::string filepathManual = "./tapes/manual.txt";
+    std::vector<std::string> records;
+    char buff[100];
+    int i = 0;
+    int num;
     while (c != 0x1B)
     {
         printw("1) Manualy\n");
@@ -68,8 +74,31 @@ void App::GenerateRecords()
         switch (c)
         {
         case 0x31:
+            printw("Insert number of records\n");
+            refresh();
+            curs_set(1);
+            echo();
+            getstr(buff);
+            num = atoi(buff);
+            while (i < num)
+            {
+                getstr(buff);
+                records.push_back(buff);
+                i++;
+            }
+            FileManager::GetInstance().WriteVectorToFile(filepathManual, records);
+            curs_set(0);
+            noecho();
             break;
         case 0x32:
+            printw("Insert number of records\n");
+            refresh();
+            curs_set(1);
+            echo();
+            getstr(buff);
+            FileManager::GetInstance().GenerateFile(atoi(buff), filepathRandom);
+            curs_set(0);
+            noecho();
             break;
         default:
             clear();
