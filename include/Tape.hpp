@@ -16,10 +16,7 @@ public:
 
     std::string GetNextRecord();
     void SetNextRecord(std::string newRecord);
-
-    // if we merge two series the new record may not be in order
-    // example: we have "a" and "c" in the buffer and we want to add "b"
-    // we have to reorganize the serie in buffer
+    
     std::string GetSerieEnd();
     void SetNextSerieEnd(std::string newSerieEnd);
 
@@ -31,7 +28,6 @@ public:
     inline void FillBuffer() { FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords); }
 
 
-    inline void ReduceNumberOfSerie(size_t amount) {numberOfSeries -= amount;}
     inline void ResetSeriesEnd() {seriesEnd.clear();}
     inline void Clear(){FileManager::GetInstance().ClearFile(filename);} // to clear a file
     inline void SetFile(std::string filename) { this->filename = filename; }

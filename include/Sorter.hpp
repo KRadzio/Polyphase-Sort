@@ -5,6 +5,8 @@
 #include <vector>
 #include <cmath>
 
+#include <ncurses.h>
+
 #include "FileManager.hpp"
 #include "Tape.hpp"
 
@@ -43,5 +45,6 @@ private:
     size_t currFib;
     size_t fibIndex = 1;
     size_t numberOfPhases;
+    size_t recordsCount = 0;
 };
 #endif

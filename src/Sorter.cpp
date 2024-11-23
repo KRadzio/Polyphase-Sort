@@ -52,13 +52,14 @@ void Sorter::Sort(std::string inputTapeName)
         currPhase++;
         if (currPhase < numberOfPhases)
         {
-             SwapAndClearTapes();
-             recordS = recordL;
-             recordL = EMPTY_RECORD;
+            SwapAndClearTapes();
+            recordS = recordL;
+            recordL = EMPTY_RECORD;
         }
-           
     }
     emptyTape->Save();
+    printw("Reads: %ld Writes: %ld File accesed: %ld times\n", FileManager::GetInstance().GetReads(), FileManager::GetInstance().GetWrites(), FileManager::GetInstance().GetFileAccesses());
+    refresh();
 }
 
 size_t Sorter::Fib(int n)
@@ -115,10 +116,11 @@ void Sorter::SplitToTapes(std::string inputTapeName)
     if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
 
-    // something is wrong here
-    std::cout << "Theoretical number of file accesses " << 2 * 1000 * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE) << std::endl;
+    float theoreticalNumber = 2 * recordsCount * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE);
 
-    std::cout << currFib << " " << fibIndex << " " << tape2.GetNumberOfSeries() << " " << tape3.GetNumberOfSeries() << " " << dummyCount << " " << numberOfPhases << std::endl;
+    printw("Theoretical number of file accesses %f\n", theoreticalNumber);
+    printw("%ld %ld %ld %ld %ld %ld %ld\n", currFib, fibIndex, tape2.GetNumberOfSeries(), tape3.GetNumberOfSeries(), dummyCount, numberOfPhases, recordsCount);
+    refresh();
 }
 
 void Sorter::FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape)
@@ -145,6 +147,7 @@ void Sorter::FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape)
         }
         else
             currTape.SetNextRecord(record);
+        recordsCount++;
     }
 }
 
@@ -260,7 +263,7 @@ void Sorter::MergeTwoSeries(std::string &recordS, std::string &recordL)
         {
             emptyTape->SetNextRecord(recordS);
             recordS = shorterTape->GetNextRecord();
-        }         
+        }
     }
 }
 
@@ -291,3 +294,4 @@ int Sorter::FindClosestFibNumberIndex(size_t seriesCount)
     }
     return index;
 }
+
