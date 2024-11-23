@@ -28,6 +28,8 @@ class FileManager
 
 public:
     static FileManager &GetInstance();
+
+    void ResetCounters();
     void GenerateFile(int lineCount, std::string filename);
     void WriteVectorToFile(std::string filename, std::vector<std::string>& vecotr);
     void GenerateEmptyFile(std::string filename);

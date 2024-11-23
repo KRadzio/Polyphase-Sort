@@ -1,7 +1,11 @@
 #include "App.hpp"
 
-App::App() {}
-App::~App() {}
+App::App()
+{
+    initscr();
+    start_color();
+}
+App::~App() { endwin(); }
 
 App &App::GetInstance()
 {
@@ -9,10 +13,18 @@ App &App::GetInstance()
     return *instance;
 }
 
+void App::Experiment()
+{
+    Sorter::GetInstance().Sort("./tapes/test.txt", true);
+    Sorter::GetInstance().Sort("./tapes/test2.txt", true);
+    Sorter::GetInstance().Sort("./tapes/test3.txt", true);
+    Sorter::GetInstance().Sort("./tapes/test4.txt", true);
+    Sorter::GetInstance().Sort("./tapes/test5.txt", true);
+}
+
 void App::MainLoop()
 {
-    initscr();
-    start_color();
+
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     raw();
@@ -47,7 +59,6 @@ void App::MainLoop()
             break;
         }
     }
-    endwin();
 }
 
 void App::GenerateRecords()

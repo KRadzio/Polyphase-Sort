@@ -8,6 +8,13 @@ FileManager &FileManager::GetInstance()
     static FileManager *instance = new FileManager;
     return *instance;
 }
+
+void FileManager::ResetCounters(){
+    writes = 0;
+    reads = 0;
+    fileAcceses = 0;
+}
+
 void FileManager::GenerateFile(int lineCount, std::string filename)
 {
     std::ofstream file;

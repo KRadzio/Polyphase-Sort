@@ -19,11 +19,11 @@ Sorter &Sorter::GetInstance()
     return *instance;
 }
 
-void Sorter::Sort(std::string inputTapeName)
+void Sorter::Sort(std::string inputTapeName, bool skip)
 {
     ResetTapes(); // so that we can sort onece again
 
-    SplitToTapes(inputTapeName); // dystribution
+    SplitToTapes(inputTapeName, skip); // dystribution
 
     // sorting
 
@@ -32,7 +32,7 @@ void Sorter::Sort(std::string inputTapeName)
     size_t currPhase = 0;
     std::string recordS = EMPTY_RECORD; // if we reached the end of shorter tape this will be reseted to EMPTY_RECORD
     std::string recordL = EMPTY_RECORD;
-    char c;
+    char c = 0x00;
 
     while (currPhase < numberOfPhases)
     {
@@ -57,39 +57,46 @@ void Sorter::Sort(std::string inputTapeName)
             recordS = recordL;
             recordL = EMPTY_RECORD;
         }
-        printw("Phase %ld ended\n", currPhase);
+        if (!skip)
+        {
+            printw("Phase %ld ended\n", currPhase);
+            printw("p) Print tapes\n");
+            refresh();
+            c = getch();
+            switch (c)
+            {
+            case 0x70:
+                longerTape->Diplay();
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    if (!skip)
+    {
+        attron(COLOR_PAIR(2));
+        printw("After:\n");
+        refresh();
+        attroff(COLOR_PAIR(2));
+
         printw("p) Print tapes\n");
         refresh();
         c = getch();
         switch (c)
         {
         case 0x70:
-            longerTape->Diplay();
+            emptyTape->Diplay();
             break;
         default:
             break;
         }
     }
-    attron(COLOR_PAIR(2));
-    printw("After:\n");
-    refresh();
-    attroff(COLOR_PAIR(2));
-
-    printw("p) Print tapes\n");
-    refresh();
-    c = getch();
-    switch (c)
-    {
-    case 0x70:
-        emptyTape->Diplay();
-        break;
-    default:
-        break;
-    }
+    // save since it may not have been saved
     emptyTape->Save();
 
-    float fileAccesesT = 2 * recordsCount * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE);
-    float phasesT = 1.45 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries());
+    fileAccesesT = 2 * recordsCount * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE);
+    phasesT = 1.45 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries());
     printw("Theoretical number of file accesses %f\n", fileAccesesT);
     printw("Theoretical number of phases: %f\n", phasesT);
     printw("Reads: %ld Writes: %ld\n", FileManager::GetInstance().GetReads(), FileManager::GetInstance().GetWrites());
@@ -121,7 +128,7 @@ size_t Sorter::Fib(int n)
     }
 }
 
-void Sorter::SplitToTapes(std::string inputTapeName)
+void Sorter::SplitToTapes(std::string inputTapeName, bool skip)
 {
     FileManager::GetInstance().ClearFile(TAPE2);
     FileManager::GetInstance().ClearFile(TAPE3);
@@ -151,22 +158,26 @@ void Sorter::SplitToTapes(std::string inputTapeName)
     numberOfPhases = fibIndex - 2;
     if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
-    attron(COLOR_PAIR(1));
-    printw("Before:\n");
-    refresh();
-    attroff(COLOR_PAIR(1));
 
-    char c;
-    printw("p) Print tapes\n");
-    refresh();
-    c = getch();
-    switch (c)
+    if (!skip)
     {
-    case 0x70:
-        tape1.Diplay();
-        break;
-    default:
-        break;
+        attron(COLOR_PAIR(1));
+        printw("Before:\n");
+        refresh();
+        attroff(COLOR_PAIR(1));
+
+        char c;
+        printw("p) Print tapes\n");
+        refresh();
+        c = getch();
+        switch (c)
+        {
+        case 0x70:
+            tape1.Diplay();
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -331,6 +342,8 @@ void Sorter::ResetTapes()
     dummyCount = 0;
     fibIndex = 1;
     recordsCount = 0;
+    FileManager::GetInstance().ResetCounters();
+
     tape1.Clear();
     tape1.ResetSeriesEnd();
     tape1.ClearBuffer();

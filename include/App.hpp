@@ -11,11 +11,13 @@
 class App
 {
 public:
-    static App& GetInstance();
+    static App &GetInstance();
+    void Experiment();
     void MainLoop();
+
+private:
     void GenerateRecords();
     void LoadFile();
-
     void GenerateChart();
 
 private:

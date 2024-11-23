@@ -14,17 +14,21 @@ class Sorter
 {
 public:
     static Sorter &GetInstance();
-    void Sort(std::string inputTapeName);
+    void Sort(std::string inputTapeName, bool skip = false);
+
+    inline size_t GetNumberOfPhases() { return numberOfPhases; }
+    inline float GetTheoreticalNumberoOfPhases() { return phasesT; }
+    inline float GetTheoreticalFileAccesses() { return fileAccesesT; }
 
 private:
     size_t Fib(int n);
-    void SplitToTapes(std::string inputTapeName);
+    void SplitToTapes(std::string inputTapeName, bool skip);
     void FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape);
     void SetUpTapesBeforeSorting();
     void SwapAndClearTapes();
-    void FillWithShorterTapeSerie(std::string& recordS);
-    void MergeTwoSeries(std::string& recordS, std::string& recordL);
-    void InsertNextRecord(std::string& recordS, std::string& recordL);
+    void FillWithShorterTapeSerie(std::string &recordS);
+    void MergeTwoSeries(std::string &recordS, std::string &recordL);
+    void InsertNextRecord(std::string &recordS, std::string &recordL);
     void ResetTapes();
     int FindClosestFibNumberIndex(size_t seriesCount);
 
@@ -48,5 +52,7 @@ private:
     size_t numberOfPhases;
     // used in distribution
     size_t recordsCount = 0;
+    float fileAccesesT;
+    float phasesT;
 };
 #endif
