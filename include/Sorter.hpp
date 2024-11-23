@@ -25,6 +25,7 @@ private:
     void FillWithShorterTapeSerie(std::string& recordS);
     void MergeTwoSeries(std::string& recordS, std::string& recordL);
     void InsertNextRecord(std::string& recordS, std::string& recordL);
+    void ResetTapes();
     int FindClosestFibNumberIndex(size_t seriesCount);
 
 private:
@@ -45,6 +46,7 @@ private:
     size_t currFib;
     size_t fibIndex = 1;
     size_t numberOfPhases;
+    // used in distribution
     size_t recordsCount = 0;
 };
 #endif

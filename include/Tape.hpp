@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <ncurses.h>
+
 #include "FileManager.hpp"
 
 // this one needs cleanup
@@ -24,12 +26,14 @@ public:
     void Save();
     void SetFileAndFillBuffer(std::string filename); // change file, reset index and load first block from new file
 
+    void Diplay();
+
+    inline void ResetSerieCount() { numberOfSeries = 0; }
     inline void ClearBuffer() { FileManager::GetInstance().ClearBufferFromIndex(vectorOfRecords, 0); }
     inline void FillBuffer() { FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords); }
 
-
-    inline void ResetSeriesEnd() {seriesEnd.clear();}
-    inline void Clear(){FileManager::GetInstance().ClearFile(filename);} // to clear a file
+    inline void ResetSeriesEnd() { seriesEnd.clear(); }
+    inline void Clear() { FileManager::GetInstance().ClearFile(filename); } // to clear a file
     inline void SetFile(std::string filename) { this->filename = filename; }
     inline bool HasEnded() { return hasEnded; }
     inline std::string GetPrevRecord() { return prevRecord; }

@@ -81,3 +81,37 @@ void Tape::SetFileAndFillBuffer(std::string filename)
     prevRecord = EMPTY_RECORD;
     hasEnded = false;
 }
+
+void Tape::Diplay()
+{
+    std::ifstream file;
+    std::string line;
+    char buffer[31];
+    buffer[30] = '\0';
+    file.open(filename);
+    for (size_t i = 1; i < blockNum; i++)
+    {
+        for (int j = 0; j < BLOC_SIZE / RECORD_SIZE; j++)
+        {
+            getline(file, line);
+            for (size_t k = 0; k < line.size(); k++)
+                buffer[k] = line[k];
+            printw(buffer);
+            printw("\n");
+            refresh();
+        }
+    }
+    file.close();
+
+    for (size_t i = 0; i < vectorOfRecords.size(); i++)
+    {
+        if (vectorOfRecords[i] != EMPTY_RECORD)
+        {
+            for (size_t k = 0; k < vectorOfRecords[i].size(); k++)
+                buffer[k] = vectorOfRecords[i][k];
+            printw(buffer);
+            printw("\n");
+            refresh();
+        }
+    }
+}

@@ -19,9 +19,10 @@ Sorter &Sorter::GetInstance()
     return *instance;
 }
 
-// here
 void Sorter::Sort(std::string inputTapeName)
 {
+    ResetTapes(); // so that we can sort onece again
+
     SplitToTapes(inputTapeName); // dystribution
 
     // sorting
@@ -31,8 +32,8 @@ void Sorter::Sort(std::string inputTapeName)
     size_t currPhase = 0;
     std::string recordS = EMPTY_RECORD; // if we reached the end of shorter tape this will be reseted to EMPTY_RECORD
     std::string recordL = EMPTY_RECORD;
+    char c;
 
-    // phase 6 something breaks
     while (currPhase < numberOfPhases)
     {
         size_t seriesCount = 0;
@@ -56,9 +57,44 @@ void Sorter::Sort(std::string inputTapeName)
             recordS = recordL;
             recordL = EMPTY_RECORD;
         }
+        printw("Phase %ld ended\n", currPhase);
+        printw("p) Print tapes\n");
+        refresh();
+        c = getch();
+        switch (c)
+        {
+        case 0x70:
+            longerTape->Diplay();
+            break;
+        default:
+            break;
+        }
+    }
+    attron(COLOR_PAIR(2));
+    printw("After:\n");
+    refresh();
+    attroff(COLOR_PAIR(2));
+
+    printw("p) Print tapes\n");
+    refresh();
+    c = getch();
+    switch (c)
+    {
+    case 0x70:
+        emptyTape->Diplay();
+        break;
+    default:
+        break;
     }
     emptyTape->Save();
-    printw("Reads: %ld Writes: %ld File accesed: %ld times\n", FileManager::GetInstance().GetReads(), FileManager::GetInstance().GetWrites(), FileManager::GetInstance().GetFileAccesses());
+
+    float fileAccesesT = 2 * recordsCount * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE);
+    float phasesT = 1.45 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries());
+    printw("Theoretical number of file accesses %f\n", fileAccesesT);
+    printw("Theoretical number of phases: %f\n", phasesT);
+    printw("Reads: %ld Writes: %ld\n", FileManager::GetInstance().GetReads(), FileManager::GetInstance().GetWrites());
+    printw("File accesed: %ld times\n", FileManager::GetInstance().GetFileAccesses());
+    printw("Number of phases: %ld\n", numberOfPhases);
     refresh();
 }
 
@@ -115,12 +151,23 @@ void Sorter::SplitToTapes(std::string inputTapeName)
     numberOfPhases = fibIndex - 2;
     if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
-
-    float theoreticalNumber = 2 * recordsCount * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE);
-
-    printw("Theoretical number of file accesses %f\n", theoreticalNumber);
-    printw("%ld %ld %ld %ld %ld %ld %ld\n", currFib, fibIndex, tape2.GetNumberOfSeries(), tape3.GetNumberOfSeries(), dummyCount, numberOfPhases, recordsCount);
+    attron(COLOR_PAIR(1));
+    printw("Before:\n");
     refresh();
+    attroff(COLOR_PAIR(1));
+
+    char c;
+    printw("p) Print tapes\n");
+    refresh();
+    c = getch();
+    switch (c)
+    {
+    case 0x70:
+        tape1.Diplay();
+        break;
+    default:
+        break;
+    }
 }
 
 void Sorter::FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape)
@@ -151,7 +198,6 @@ void Sorter::FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape)
     }
 }
 
-// here
 void Sorter::SetUpTapesBeforeSorting()
 {
     // clear tape one since it will be empty
@@ -177,12 +223,9 @@ void Sorter::SetUpTapesBeforeSorting()
     shorterTape->ResetIndex();
     longerTape->ResetIndex();
 }
-// here
+
 void Sorter::SwapAndClearTapes()
 {
-    // save since buffer is auto-saved only if full
-    // emptyTape->Save();
-
     // swap tapes
     Tape *tmp = emptyTape;
     emptyTape = shorterTape;
@@ -219,6 +262,7 @@ void Sorter::FillWithShorterTapeSerie(std::string &recordS)
             emptyTape->SetNextRecord(recordS);
     }
 }
+
 void Sorter::MergeTwoSeries(std::string &recordS, std::string &recordL)
 {
     bool serieEndedS = false;
@@ -226,6 +270,7 @@ void Sorter::MergeTwoSeries(std::string &recordS, std::string &recordL)
     std::string serieEndS = shorterTape->GetSerieEnd();
     std::string serieEndL = longerTape->GetSerieEnd();
 
+    // set new serie end
     if (serieEndS > serieEndL)
         emptyTape->SetNextSerieEnd(serieEndS);
     else
@@ -244,7 +289,7 @@ void Sorter::MergeTwoSeries(std::string &recordS, std::string &recordL)
         recordS = shorterTape->GetNextRecord();
         InsertNextRecord(recordS, recordL);
     }
-
+    // merge two series
     while (!serieEndedS || !serieEndedL)
     {
         if (shorterTape->GetPrevRecord() == serieEndS && recordS != serieEndS)
@@ -281,6 +326,30 @@ void Sorter::InsertNextRecord(std::string &recordS, std::string &recordL)
     }
 }
 
+void Sorter::ResetTapes()
+{
+    dummyCount = 0;
+    fibIndex = 1;
+    recordsCount = 0;
+    tape1.Clear();
+    tape1.ResetSeriesEnd();
+    tape1.ClearBuffer();
+    tape1.ResetIndex(false);
+    tape1.ResetSerieCount();
+
+    tape2.Clear();
+    tape2.ResetSeriesEnd();
+    tape2.ClearBuffer();
+    tape2.ResetIndex(false);
+    tape2.ResetSerieCount();
+
+    tape3.Clear();
+    tape3.ResetSeriesEnd();
+    tape3.ClearBuffer();
+    tape3.ResetIndex(false);
+    tape3.ResetSerieCount();
+}
+
 int Sorter::FindClosestFibNumberIndex(size_t seriesCount)
 {
     int index = 1;
@@ -294,4 +363,3 @@ int Sorter::FindClosestFibNumberIndex(size_t seriesCount)
     }
     return index;
 }
-

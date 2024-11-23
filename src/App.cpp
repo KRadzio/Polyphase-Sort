@@ -31,16 +31,12 @@ void App::MainLoop()
         switch (c)
         {
         case 0x31:
-            // attroff(COLOR_PAIR(2));
-            // attron(COLOR_PAIR(1));
             GenerateRecords();
             clear();
             break;
         case 0x32:
             LoadFile();
             clear();
-            // attroff(COLOR_PAIR(1));
-            // attron(COLOR_PAIR(2));
             break;
         case 0x1B:
             run = false;
@@ -106,6 +102,7 @@ void App::GenerateRecords()
         }
     }
 }
+
 void App::LoadFile()
 {
     clear();
@@ -126,11 +123,11 @@ void App::LoadFile()
             getstr(buff);
             curs_set(0);
             path += buff;
+            noecho();
             Sorter::GetInstance().Sort(path);
             printw("Press any key to continue\n");
             refresh();
             getchar();
-            noecho();
             c = 0x1B;
             break;
         default:
@@ -139,3 +136,5 @@ void App::LoadFile()
         }
     }
 }
+
+void App::GenerateChart() {}

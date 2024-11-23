@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <ncurses.h>
+#include <plplot/plplot.h>
 
 #include "Sorter.hpp"
 
@@ -14,6 +15,8 @@ public:
     void MainLoop();
     void GenerateRecords();
     void LoadFile();
+
+    void GenerateChart();
 
 private:
     App();
