@@ -62,27 +62,6 @@ void FileManager::GenerateEmptyFile(std::string filename)
     file.close();
 }
 
-void FileManager::DisplayEntireFile(std::string filename)
-{
-    std::ifstream file;
-    file.open(filename);
-    std::string line;
-
-    int blockNum = 0;
-    int currBytesInBlock = 0;
-    while (getline(file, line))
-    {
-        currBytesInBlock += 30;
-        if (currBytesInBlock > BLOC_SIZE)
-        {
-            currBytesInBlock = 0;
-            blockNum++;
-        }
-        std::cout << "Block: " << blockNum << " Offset: " << currBytesInBlock << " Line: " << line << std::endl;
-    }
-    file.close();
-}
-
 void FileManager::ReadBlockFromFile(std::string filename, int blockNum, std::vector<std::string> &buffer)
 {
     std::ifstream file;
@@ -152,47 +131,6 @@ void FileManager::WriteBlockToFile(std::string filename, std::vector<std::string
     ClearBufferFromIndex(buffer, 0);
 }
 
-void FileManager::ReplaceBlockInFile(std::string filename, int blockNum, std::vector<std::string> &buffer)
-{
-    std::fstream file;
-    file.open(filename);
-
-    int currBlockNum = 1;
-    int maxRecords = BLOC_SIZE / RECORD_SIZE;
-    std::string line;
-
-    // get to the block that we want to replace
-    while (currBlockNum != blockNum)
-    {
-        for (int i = 0; i < maxRecords; i++)
-            getline(file, line);
-        currBlockNum++;
-        if (file.eof()) // out of bounds
-        {
-            file.close();
-            return;
-        }
-    }
-
-    writes += BLOC_SIZE / RECORD_SIZE;
-    fileAcceses++;
-
-    // every record needs to have a fixed number of characters
-    for (size_t i = 0; i < buffer.size(); i++)
-    {
-        if (buffer[i] != EMPTY_RECORD)
-        {
-            file << buffer[i];
-            for (size_t j = buffer[i].size(); j < RECORD_SIZE; j++)
-                file << UNUSED_BYTE;
-            file << std::endl;
-        }
-    }
-
-    file.close();
-    ClearBufferFromIndex(buffer, 0);
-}
-
 void FileManager::ClearFile(std::string filename)
 {
     std::ofstream file;
@@ -204,7 +142,7 @@ void FileManager::ClearBufferFromIndex(std::vector<std::string> &buffer, size_t 
 {
     while (index != buffer.size())
     {
-        buffer[index] = "";
+        buffer[index] = EMPTY_RECORD;
         index++;
     }
 }

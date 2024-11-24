@@ -42,9 +42,9 @@ void Tape::SetNextRecord(std::string newRecord)
 
 std::string Tape::GetSerieEnd()
 {
-    seriesEndIndex++;
-    if (seriesEndIndex <= seriesEnd.size())
-        return seriesEnd[seriesEndIndex - 1];
+    runsEndIndex++;
+    if (runsEndIndex <= seriesEnd.size())
+        return seriesEnd[runsEndIndex - 1];
     else
         return EMPTY_RECORD;
 }
@@ -52,7 +52,7 @@ std::string Tape::GetSerieEnd()
 void Tape::SetNextSerieEnd(std::string newSerieEnd)
 {
     seriesEnd.push_back(newSerieEnd);
-    seriesEndIndex++;
+    runsEndIndex++;
 }
 
 void Tape::ResetIndex(bool save)
@@ -63,7 +63,7 @@ void Tape::ResetIndex(bool save)
         FileManager::GetInstance().ReadBlockFromFile(filename, 1, vectorOfRecords);
     }
     index = 0;
-    seriesEndIndex = 0;
+    runsEndIndex = 0;
     blockNum = 1;
     prevRecord = EMPTY_RECORD;
     hasEnded = false;
@@ -76,10 +76,20 @@ void Tape::SetFileAndFillBuffer(std::string filename)
     this->filename = filename;
     FileManager::GetInstance().ReadBlockFromFile(filename, blockNum, vectorOfRecords);
     index = 0;
-    seriesEndIndex = 0;
+    runsEndIndex = 0;
     blockNum = 1;
     prevRecord = EMPTY_RECORD;
     hasEnded = false;
+}
+
+void Tape::ClearBuffer()
+{
+    size_t i = 0;
+    while (i != vectorOfRecords.size())
+    {
+        vectorOfRecords[i] = EMPTY_RECORD;
+        i++;
+    }
 }
 
 void Tape::Diplay()

@@ -8,7 +8,6 @@
 
 #include "FileManager.hpp"
 
-// this one needs cleanup
 class Tape
 {
 
@@ -21,7 +20,7 @@ public:
     inline std::string GetPrevRecord() { return prevRecord; }
     void SetNextRecord(std::string newRecord);
 
-    // serie end operations
+    // runs end operations
     std::string GetSerieEnd();
     void SetNextSerieEnd(std::string newSerieEnd);
     inline void ResetSeriesEnd() { seriesEnd.clear(); }
@@ -30,7 +29,7 @@ public:
     void ResetIndex(bool save = true); // used when tape has ended or its purpuse is swaped from read to write
     void Save(); // save buffer (used after sorting is done to save the last block that may not be full)
     void SetFileAndFillBuffer(std::string filename); // change file, reset index and load first block from new file
-    inline void ClearBuffer() { FileManager::GetInstance().ClearBufferFromIndex(vectorOfRecords, 0); }
+    void ClearBuffer();
 
     void Diplay();
 
@@ -38,10 +37,10 @@ public:
     inline void Clear() { FileManager::GetInstance().ClearFile(filename); } // to clear a file
     inline void SetFile(std::string filename) { this->filename = filename; }
 
-    // serie count
-    inline void ResetSerieCount() { numberOfInitialSeries = 0; }
-    inline void IncrementNumberOfSeries() { numberOfInitialSeries++; }
-    inline size_t GetNumberOfSeries() { return numberOfInitialSeries; } // returns INITIAL number of series (not used after distribution phase)
+    // runs count
+    inline void ResetRunsCount() { numberOfInitialRuns = 0; }
+    inline void IncrementNumberOfRuns() { numberOfInitialRuns++; }
+    inline size_t GetNumberOfRuns() { return numberOfInitialRuns; } // returns INITIAL number of runs (not used after distribution phase)
 
     inline bool HasEnded() { return hasEnded; }
 
@@ -51,8 +50,8 @@ private:
     std::vector<std::string> vectorOfRecords;
     std::vector<std::string> seriesEnd;
     size_t index = 0;
-    size_t seriesEndIndex = 0;
-    size_t numberOfInitialSeries = 0;
+    size_t runsEndIndex = 0;
+    size_t numberOfInitialRuns = 0;
     size_t blockNum = 1;
     std::string filename;
     std::string prevRecord = EMPTY_RECORD;

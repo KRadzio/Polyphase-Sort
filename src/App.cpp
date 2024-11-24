@@ -20,7 +20,6 @@ App &App::GetInstance()
     return *instance;
 }
 
-// remove code dupes
 void App::Experiment()
 {
     wclear(window);
@@ -57,6 +56,7 @@ void App::MainLoop()
     {
         wprintw(window, "1) Generate records\n");
         wprintw(window, "2) Load records from file\n");
+        wprintw(window, "e) Experiment\n");
         wprintw(window, "c) Clear screen\n");
         wprintw(window, "q) Quit\n");
         wrefresh(window);
@@ -75,6 +75,9 @@ void App::MainLoop()
             break;
         case 0x63:
             wclear(window);
+            break;
+        case 0x65:
+            Experiment();
             break;
         default:
             break;
@@ -177,10 +180,10 @@ void App::RunTestOnTape(std::string filename, size_t N)
     wprintw(window, "N = %ld\n", N);
     wrefresh(window);
     Sorter::GetInstance().Sort(filename, true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfRuns(), Sorter::GetInstance().GetNumberOfRecords());
     wrefresh(window);
 
-    outputFile << Sorter::GetInstance().GetNumberOfRecords() << " " << Sorter::GetInstance().GetInitialNumberOfSeries() << " "
+    outputFile << Sorter::GetInstance().GetNumberOfRecords() << " " << Sorter::GetInstance().GetInitialNumberOfRuns() << " "
                << Sorter::GetInstance().GetNumberOfPhases() << " " << Sorter::GetInstance().GetNumberOfFileAccesses() << " "
                << Sorter::GetInstance().GetTheoreticalNumberoOfPhases() << " " << Sorter::GetInstance().GetTheoreticalFileAccesses() << std::endl;
 }

@@ -19,7 +19,7 @@ public:
     void SetWindow(_win_st *window);
 
     inline size_t GetNumberOfPhases() { return numberOfPhases; }
-    inline size_t GetInitialNumberOfSeries() { return initialSerieCount; }
+    inline size_t GetInitialNumberOfRuns() { return initialRunsCount; }
     inline size_t GetNumberOfRecords() { return recordsCount; }
     inline size_t GetNumberOfFileAccesses() { return fileAccesses; }
     inline size_t GetNumberOfReads() { return reads; }
@@ -33,11 +33,11 @@ private:
     void FillTapeUpToCurrGoal(Tape &currTape, Tape &otherTape);
     void SetUpTapesBeforeSorting();
     void SwapAndClearTapes();
-    void FillWithShorterTapeSerie(std::string &recordS);
-    void MergeTwoSeries(std::string &recordS, std::string &recordL);
+    void FillWithShorterTapeRuns(std::string &recordS);
+    void MergeTwoRuns(std::string &recordS, std::string &recordL);
     void InsertNextRecord(std::string &recordS, std::string &recordL);
     void ResetTapes();
-    int FindClosestFibNumberIndex(size_t seriesCount);
+    int FindClosestFibNumberIndex(size_t runsCount);
 
 private:
     Sorter();
@@ -59,7 +59,7 @@ private:
     size_t numberOfPhases;
     // stats
     size_t recordsCount = 0;
-    size_t initialSerieCount = 0;
+    size_t initialRunsCount = 0;
     size_t reads = 0;
     size_t writes = 0;
     size_t fileAccesses = 0;
