@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include <ncurses.h>
-#include <plplot/plplot.h>
 
 #include "Sorter.hpp"
 
@@ -18,7 +17,7 @@ public:
 private:
     void GenerateRecords();
     void LoadFile();
-    void GenerateChart();
+    void RunTestOnTape(std::string filename, size_t N);
 
 private:
     App();
@@ -26,9 +25,10 @@ private:
 
 private:
     bool run = true;
-    WINDOW* window;
+    WINDOW *window;
     int height;
     int width;
+    std::ofstream outputFile;
 };
 
 #endif

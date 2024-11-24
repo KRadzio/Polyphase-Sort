@@ -20,72 +20,29 @@ App &App::GetInstance()
     return *instance;
 }
 
+// remove code dupes
 void App::Experiment()
 {
     wclear(window);
-    wprintw(window, "N = 10\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
 
-    wprintw(window, "N = 100\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test2.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
+    outputFile.open("./output/experiment.txt");
 
-    wprintw(window, "N = 500\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test3.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 1000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test4.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 2000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test5.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 5000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test6.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 10000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test7.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 20000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test8.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 50000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test9.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
-
-    wprintw(window, "N = 100000\n");
-    wrefresh(window);
-    Sorter::GetInstance().Sort("./tapes/test10.txt", true);
-    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
-    wrefresh(window);
+    RunTestOnTape("./tapes/test.txt", 10);
+    RunTestOnTape("./tapes/test2.txt", 100);
+    RunTestOnTape("./tapes/test3.txt", 500);
+    RunTestOnTape("./tapes/test4.txt", 1000);
+    RunTestOnTape("./tapes/test5.txt", 2000);
+    RunTestOnTape("./tapes/test6.txt", 5000);
+    RunTestOnTape("./tapes/test7.txt", 10000);
+    RunTestOnTape("./tapes/test8.txt", 20000);
+    RunTestOnTape("./tapes/test9.txt", 50000);
+    RunTestOnTape("./tapes/test10.txt", 100000);
 
     wprintw(window, "Press any key to continue\n");
     wrefresh(window);
     getchar();
+
+    outputFile.close();
 
     echo();
     curs_set(1);
@@ -215,4 +172,15 @@ void App::LoadFile()
     }
 }
 
-void App::GenerateChart() {}
+void App::RunTestOnTape(std::string filename, size_t N)
+{
+    wprintw(window, "N = %ld\n", N);
+    wrefresh(window);
+    Sorter::GetInstance().Sort(filename, true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    outputFile << Sorter::GetInstance().GetNumberOfRecords() << " " << Sorter::GetInstance().GetInitialNumberOfSeries() << " "
+               << Sorter::GetInstance().GetNumberOfPhases() << " " << Sorter::GetInstance().GetNumberOfFileAccesses() << " "
+               << Sorter::GetInstance().GetTheoreticalNumberoOfPhases() << " " << Sorter::GetInstance().GetTheoreticalFileAccesses() << std::endl;
+}
