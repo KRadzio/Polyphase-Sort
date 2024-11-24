@@ -41,13 +41,15 @@ public:
     // serie count
     inline void ResetSerieCount() { numberOfInitialSeries = 0; }
     inline void IncrementNumberOfSeries() { numberOfInitialSeries++; }
-    inline size_t GetNumberOfSeries() { return numberOfInitialSeries; } // returns INITIAl number of series (not used after distribution phase)
+    inline size_t GetNumberOfSeries() { return numberOfInitialSeries; } // returns INITIAL number of series (not used after distribution phase)
 
     inline bool HasEnded() { return hasEnded; }
 
+    inline void SetWindow(_win_st* window){this->window = window;}
+
 private:
     std::vector<std::string> vectorOfRecords;
-    std::vector<std::string> seriesEnd; // used in first phase of mergeing
+    std::vector<std::string> seriesEnd;
     size_t index = 0;
     size_t seriesEndIndex = 0;
     size_t numberOfInitialSeries = 0;
@@ -55,6 +57,7 @@ private:
     std::string filename;
     std::string prevRecord = EMPTY_RECORD;
     bool hasEnded = false;
+    _win_st * window;
 };
 
 #endif

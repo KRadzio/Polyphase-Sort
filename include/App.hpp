@@ -26,6 +26,9 @@ private:
 
 private:
     bool run = true;
+    WINDOW* window;
+    int height;
+    int width;
 };
 
 #endif

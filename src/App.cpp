@@ -3,14 +3,16 @@
 App::App()
 {
     initscr();
-    start_color();
+    getmaxyx(stdscr, height, width);
+    window = newwin(height - 2, width - 2, 1, 1);
+    scrollok(window, TRUE);
+    raw();
+    noecho();
+    curs_set(0);
+
+    Sorter::GetInstance().SetWindow(window);
 }
-App::~App()
-{
-    echo();
-    curs_set(1);
-    endwin();
-}
+App::~App() {}
 
 App &App::GetInstance()
 {
@@ -20,56 +22,115 @@ App &App::GetInstance()
 
 void App::Experiment()
 {
-    clear();
+    wclear(window);
+    wprintw(window, "N = 10\n");
+    wrefresh(window);
     Sorter::GetInstance().Sort("./tapes/test.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 100\n");
+    wrefresh(window);
     Sorter::GetInstance().Sort("./tapes/test2.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 500\n");
+    wrefresh(window);
     Sorter::GetInstance().Sort("./tapes/test3.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 1000\n");
+    wrefresh(window);
     Sorter::GetInstance().Sort("./tapes/test4.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 2000\n");
+    wrefresh(window);
     Sorter::GetInstance().Sort("./tapes/test5.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 5000\n");
+    wrefresh(window);
+    Sorter::GetInstance().Sort("./tapes/test6.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 10000\n");
+    wrefresh(window);
+    Sorter::GetInstance().Sort("./tapes/test7.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 20000\n");
+    wrefresh(window);
+    Sorter::GetInstance().Sort("./tapes/test8.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 50000\n");
+    wrefresh(window);
+    Sorter::GetInstance().Sort("./tapes/test9.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "N = 100000\n");
+    wrefresh(window);
+    Sorter::GetInstance().Sort("./tapes/test10.txt", true);
+    wprintw(window, "%ld %ld\n", Sorter::GetInstance().GetInitialNumberOfSeries(), Sorter::GetInstance().GetNumberOfRecords());
+    wrefresh(window);
+
+    wprintw(window, "Press any key to continue\n");
+    wrefresh(window);
+    getchar();
+
+    echo();
+    curs_set(1);
+    endwin();
 }
 
 void App::MainLoop()
 {
-
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    raw();
-    noecho();
-    curs_set(0);
     char c;
-    clear();
+    wclear(window);
     while (run)
     {
-        printw("1) Generate records\n");
-        printw("2) Load records from file\n");
-        printw("ESC) Quit\n");
-        refresh();
-        c = getch();
-
+        wprintw(window, "1) Generate records\n");
+        wprintw(window, "2) Load records from file\n");
+        wprintw(window, "c) Clear screen\n");
+        wprintw(window, "q) Quit\n");
+        wrefresh(window);
+        c = wgetch(window);
         switch (c)
         {
         case 0x31:
             GenerateRecords();
-            clear();
+            wclear(window);
             break;
         case 0x32:
             LoadFile();
-            clear();
             break;
-        case 0x1B:
+        case 0x71:
             run = false;
             break;
-
+        case 0x63:
+            wclear(window);
+            break;
         default:
-            clear();
             break;
         }
     }
+    echo();
+    curs_set(1);
+    endwin();
 }
 
 void App::GenerateRecords()
 {
-    clear();
+    wclear(window);
     char c = 0x00;
     std::string filepathRandom = "./tapes/random.txt";
     std::string filepathManual = "./tapes/manual.txt";
@@ -79,23 +140,23 @@ void App::GenerateRecords()
     int num;
     while (c != 0x1B)
     {
-        printw("1) Manualy\n");
-        printw("2) Randomly\n");
-        printw("ESC) Return to main menu\n");
-        refresh();
-        c = getch();
+        wprintw(window, "1) Manualy\n");
+        wprintw(window, "2) Randomly\n");
+        wprintw(window, "ESC) Return to main menu\n");
+        wrefresh(window);
+        c = wgetch(window);
         switch (c)
         {
         case 0x31:
-            printw("Insert number of records\n");
-            refresh();
+            wprintw(window, "Insert number of records\n");
+            wrefresh(window);
             curs_set(1);
             echo();
-            getstr(buff);
+            wgetstr(window, buff);
             num = atoi(buff);
             while (i < num)
             {
-                getstr(buff);
+                wgetstr(window, buff);
                 records.push_back(buff);
                 i++;
             }
@@ -104,17 +165,17 @@ void App::GenerateRecords()
             noecho();
             break;
         case 0x32:
-            printw("Insert number of records\n");
-            refresh();
+            wprintw(window, "Insert number of records\n");
+            wrefresh(window);
             curs_set(1);
             echo();
-            getstr(buff);
+            wgetstr(window, buff);
             FileManager::GetInstance().GenerateFile(atoi(buff), filepathRandom);
             curs_set(0);
             noecho();
             break;
         default:
-            clear();
+            wclear(window);
             break;
         }
     }
@@ -122,33 +183,33 @@ void App::GenerateRecords()
 
 void App::LoadFile()
 {
-    clear();
+    wclear(window);
     char c = 0x00;
     std::string path = "./tapes/";
     char buff[100];
     while (c != 0x1B)
     {
-        printw("1) Insert file name\n");
-        printw("ESC) Quit\n");
-        refresh();
-        c = getch();
+        wprintw(window, "1) Insert file name\n");
+        wprintw(window, "ESC) Quit\n");
+        wrefresh(window);
+        c = wgetch(window);
         switch (c)
         {
         case 0x31:
             curs_set(1);
             echo();
-            getstr(buff);
+            wgetstr(window, buff);
             curs_set(0);
             path += buff;
             noecho();
             Sorter::GetInstance().Sort(path);
-            printw("Press any key to continue\n");
-            refresh();
+            wprintw(window, "Press any key to continue\n");
+            wrefresh(window);
             getchar();
             c = 0x1B;
             break;
         default:
-            clear();
+            wclear(window);
             break;
         }
     }

@@ -16,7 +16,14 @@ public:
     static Sorter &GetInstance();
     void Sort(std::string inputTapeName, bool skip = false);
 
+    void SetWindow(_win_st *window);
+
     inline size_t GetNumberOfPhases() { return numberOfPhases; }
+    inline size_t GetInitialNumberOfSeries() { return initialSerieCount; }
+    inline size_t GetNumberOfRecords() { return recordsCount; }
+    inline size_t GetNumberOfFileAccesses() { return fileAccesses; }
+    inline size_t GetNumberOfReads() { return reads; }
+    inline size_t GetNumberOfWrites() { return writes; }
     inline float GetTheoreticalNumberoOfPhases() { return phasesT; }
     inline float GetTheoreticalFileAccesses() { return fileAccesesT; }
 
@@ -50,9 +57,15 @@ private:
     size_t currFib;
     size_t fibIndex = 1;
     size_t numberOfPhases;
-    // used in distribution
+    // stats
     size_t recordsCount = 0;
+    size_t initialSerieCount = 0;
+    size_t reads = 0;
+    size_t writes = 0;
+    size_t fileAccesses = 0;
     float fileAccesesT;
     float phasesT;
+
+    _win_st *window;
 };
 #endif

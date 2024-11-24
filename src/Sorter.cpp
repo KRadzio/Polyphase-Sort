@@ -59,10 +59,10 @@ void Sorter::Sort(std::string inputTapeName, bool skip)
         }
         if (!skip)
         {
-            printw("Phase %ld ended\n", currPhase);
-            printw("p) Print tapes\n");
-            refresh();
-            c = getch();
+            wprintw(window, "Phase %ld ended\n", currPhase);
+            wprintw(window, "p) Print tapes\n");
+            wrefresh(window);
+            c = wgetch(window);
             switch (c)
             {
             case 0x70:
@@ -75,14 +75,12 @@ void Sorter::Sort(std::string inputTapeName, bool skip)
     }
     if (!skip)
     {
-        attron(COLOR_PAIR(2));
-        printw("After:\n");
-        refresh();
-        attroff(COLOR_PAIR(2));
+        wprintw(window, "After sorting:\n");
+        wrefresh(window);
 
-        printw("p) Print tapes\n");
-        refresh();
-        c = getch();
+        wprintw(window, "p) Print tapes\n");
+        wrefresh(window);
+        c = wgetch(window);
         switch (c)
         {
         case 0x70:
@@ -95,14 +93,25 @@ void Sorter::Sort(std::string inputTapeName, bool skip)
     // save since it may not have been saved
     emptyTape->Save();
 
+    reads = FileManager::GetInstance().GetReads();
+    writes = FileManager::GetInstance().GetWrites();
+    fileAccesses = FileManager::GetInstance().GetFileAccesses();
     fileAccesesT = 2 * recordsCount * (1.04 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries()) + 1) / (BLOC_SIZE / RECORD_SIZE);
     phasesT = 1.45 * log2(tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries());
-    printw("Theoretical number of file accesses %f\n", fileAccesesT);
-    printw("Theoretical number of phases: %f\n", phasesT);
-    printw("Reads: %ld Writes: %ld\n", FileManager::GetInstance().GetReads(), FileManager::GetInstance().GetWrites());
-    printw("File accesed: %ld times\n", FileManager::GetInstance().GetFileAccesses());
-    printw("Number of phases: %ld\n", numberOfPhases);
-    refresh();
+    wprintw(window, "Theoretical number of file accesses %f\n", fileAccesesT);
+    wprintw(window, "Theoretical number of phases: %f\n", phasesT);
+    wprintw(window, "Reads: %ld Writes: %ld\n", reads, writes);
+    wprintw(window, "File accesed: %ld times\n", fileAccesses);
+    wprintw(window, "Number of phases: %ld\n", numberOfPhases);
+    wrefresh(window);
+}
+
+void Sorter::SetWindow(_win_st *window)
+{
+    this->window = window;
+    tape1.SetWindow(window);
+    tape2.SetWindow(window);
+    tape3.SetWindow(window);
 }
 
 size_t Sorter::Fib(int n)
@@ -157,17 +166,17 @@ void Sorter::SplitToTapes(std::string inputTapeName, bool skip)
     if (currFib != tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries())
         dummyCount = currFib - tape2.GetNumberOfSeries() - tape3.GetNumberOfSeries();
 
+    initialSerieCount = tape2.GetNumberOfSeries() + tape3.GetNumberOfSeries();
+
     if (!skip)
     {
-        attron(COLOR_PAIR(1));
-        printw("Before:\n");
-        refresh();
-        attroff(COLOR_PAIR(1));
+        wprintw(window, "Before sorting:\n");
+        wrefresh(window);
 
         char c;
-        printw("p) Print tapes\n");
-        refresh();
-        c = getch();
+        wprintw(window, "p) Print tapes\n");
+        wrefresh(window);
+        c = wgetch(window);
         switch (c)
         {
         case 0x70:

@@ -86,19 +86,24 @@ void Tape::Diplay()
 {
     std::ifstream file;
     std::string line;
-    char buffer[31];
-    buffer[30] = '\0';
+    char buffer[31] = {'\0'};
     file.open(filename);
-    for (size_t i = 1; i <= blockNum; i++)
+    for (size_t i = 1; i < blockNum; i++)
     {
         for (int j = 0; j < BLOC_SIZE / RECORD_SIZE; j++)
         {
             getline(file, line);
             for (size_t k = 0; k < line.size(); k++)
-                buffer[k] = line[k];
-            printw(buffer);
-            printw("\n");
-            refresh();
+            {
+                if (line[k] == UNUSED_BYTE)
+                    buffer[k] = UNUSED_BYTE;
+                else
+                    buffer[k] = line[k];
+            }
+
+            wprintw(window, buffer);
+            wprintw(window, "\n");
+            wrefresh(window);
         }
     }
     file.close();
@@ -108,10 +113,15 @@ void Tape::Diplay()
         if (vectorOfRecords[i] != EMPTY_RECORD)
         {
             for (size_t k = 0; k < vectorOfRecords[i].size(); k++)
-                buffer[k] = vectorOfRecords[i][k];
-            printw(buffer);
-            printw("\n");
-            refresh();
+            {
+                if (vectorOfRecords[i][k] == UNUSED_BYTE)
+                    buffer[k] = UNUSED_BYTE;
+                else
+                    buffer[k] = vectorOfRecords[i][k];
+            }
+            wprintw(window, buffer);
+            wprintw(window, "\n");
+            wrefresh(window);
         }
     }
 }
