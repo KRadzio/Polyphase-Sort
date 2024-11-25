@@ -102,6 +102,8 @@ void Tape::Diplay()
     {
         for (int j = 0; j < BLOC_SIZE / RECORD_SIZE; j++)
         {
+            for (size_t k = 0; k < 31; k++)
+                buffer[k] = UNUSED_BYTE;
             getline(file, line);
             for (size_t k = 0; k < line.size(); k++)
             {
@@ -122,6 +124,8 @@ void Tape::Diplay()
     {
         if (vectorOfRecords[i] != EMPTY_RECORD)
         {
+            for (size_t k = 0; k < 31; k++)
+                buffer[k] = UNUSED_BYTE;
             for (size_t k = 0; k < vectorOfRecords[i].size(); k++)
             {
                 if (vectorOfRecords[i][k] == UNUSED_BYTE)
