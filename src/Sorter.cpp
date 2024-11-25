@@ -57,7 +57,7 @@ void Sorter::Sort(std::string inputTapeName, bool skip)
             recordS = recordL;
             recordL = EMPTY_RECORD;
         }
-        if (!skip)
+        if (!skip && currPhase < numberOfPhases)
         {
             wprintw(window, "Phase %ld ended\n", currPhase);
             wprintw(window, "p) Print tapes\n");
