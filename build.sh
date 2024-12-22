@@ -1,2 +1,2 @@
-g++ ./src/*.cpp  -I ./include -o ./bin/proj -Wall -lncurses
+g++ ./src/*.cpp  -I ./include -o ./bin/PolyphaseSort -Wall -lncurses
 # -g for debug
